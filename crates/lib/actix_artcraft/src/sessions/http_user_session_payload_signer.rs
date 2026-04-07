@@ -1,8 +1,8 @@
 use std::collections::BTreeMap;
 
 use crate::sessions::http_user_session_payload::HttpUserSessionPayload;
+use crate::sessions::http_user_session_payload_error::HttpUserSessionPayloadError;
 use jwt_signer::jwt_signer::JwtSigner;
-use errors::AnyhowResult;
 use tokens::tokens::user_sessions::UserSessionToken;
 use tokens::tokens::users::UserToken;
 
@@ -21,14 +21,18 @@ pub struct HttpUserSessionPayloadSigner {
 }
 
 impl HttpUserSessionPayloadSigner {
-  pub fn new(hmac_secret: &str) -> AnyhowResult<Self> {
+  pub fn new(hmac_secret: &str) -> Result<Self, HttpUserSessionPayloadError> {
     Ok(Self {
-      jwt_signer: JwtSigner::new(hmac_secret)?
+      jwt_signer: JwtSigner::new(hmac_secret)?,
     })
   }
 
-  pub fn encode(&self, session_token: &UserSessionToken, user_token: &UserToken) -> AnyhowResult<String> {
-    let mut claims = BTreeMap::new();
+  pub fn encode(
+    &self,
+    session_token: &UserSessionToken,
+    user_token: &UserToken,
+  ) -> Result<String, HttpUserSessionPayloadError> {
+    let mut claims: BTreeMap<&str, &str> = BTreeMap::new();
     let payload_version = PAYLOAD_VERSION.to_string();
 
     claims.insert("session_token", session_token.as_str());
@@ -36,12 +40,14 @@ impl HttpUserSessionPayloadSigner {
     claims.insert("version", &payload_version);
 
     let jwt_string = self.jwt_signer.claims_to_jwt(&claims)?;
-
     Ok(jwt_string)
   }
 
-  pub fn decode(&self, session_payload_contents: &str) -> AnyhowResult<HttpUserSessionPayload> {
-    let claims = self.jwt_signer.jwt_to_claims(&session_payload_contents)?;
+  pub fn decode(
+    &self,
+    session_payload_contents: &str,
+  ) -> Result<HttpUserSessionPayload, HttpUserSessionPayloadError> {
+    let claims = self.jwt_signer.jwt_to_claims(session_payload_contents)?;
 
     let session_token = claims["session_token"].clone();
     let maybe_user_token = claims.get("user_token")
@@ -56,7 +62,7 @@ impl HttpUserSessionPayloadSigner {
 
 #[cfg(test)]
 mod tests {
-  use crate::sessions::payload_signer::HttpUserSessionPayloadSigner;
+  use crate::sessions::http_user_session_payload_signer::HttpUserSessionPayloadSigner;
   use tokens::tokens::user_sessions::UserSessionToken;
   use tokens::tokens::users::UserToken;
 

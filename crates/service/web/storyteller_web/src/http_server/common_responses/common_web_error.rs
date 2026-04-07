@@ -4,6 +4,7 @@ use log::{error, warn};
 use mysql_queries::errors::mysql_error::{MysqlCrateErrorSubtype, MysqlError};
 use std::error::Error;
 use std::fmt::{Display, Formatter};
+use crate::http_server::session::session_checker_error::SessionCheckerError;
 use crate::http_server::web_utils::user_session::require_user_session::RequireUserSessionError;
 
 #[derive(Debug, utoipa::ToSchema)]
@@ -105,6 +106,27 @@ impl From<RequireUserSessionError> for CommonWebError {
     match value {
       RequireUserSessionError::NotAuthorized => Self::NotAuthorized,
       RequireUserSessionError::ServerError => Self::ServerError,
+    }
+  }
+}
+
+impl From<SessionCheckerError> for CommonWebError {
+  fn from(value: SessionCheckerError) -> Self {
+    match value {
+      // Bad / forged session cookie → 401
+      // NOTE: If there's an elevated rate of across-the-board 401s,
+      // then we probably misconfigured the HMAC secret
+      SessionCheckerError::SessionPayload(_) => Self::NotAuthorized,
+      // Underlying DB / cache errors → 500
+      SessionCheckerError::Sqlx(err) => {
+        error!("SessionChecker sqlx error: {:?}", err);
+        Self::ServerError
+      },
+      // Likely Redis caching middleware
+      SessionCheckerError::OtherError(err) => {
+        error!("SessionChecker other error: {:?}", err);
+        Self::ServerError
+      },
     }
   }
 }
