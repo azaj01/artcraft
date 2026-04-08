@@ -1,4 +1,4 @@
-import { ApiManager, ApiResponse } from "./ApiManager";
+import { ApiManager, ApiResponse, buildSessionHeaders } from "./ApiManager";
 
 export class EngineApi extends ApiManager {
   public async ConvertTbxToGltf({
@@ -57,9 +57,9 @@ export class EngineApi extends ApiManager {
 
     const response = await fetch(endpoint, {
       method: "POST",
-      headers: {
+      headers: buildSessionHeaders({
         Accept: "application/json",
-      },
+      }),
       credentials: "include",
       body: formData,
     });

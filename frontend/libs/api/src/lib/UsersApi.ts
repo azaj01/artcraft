@@ -1,4 +1,4 @@
-import { ApiManager, ApiResponse } from "./ApiManager.js";
+import { ApiManager, ApiResponse, buildSessionHeaders, storeSignedSession, clearSignedSession } from "./ApiManager.js";
 import { UserInfo } from "./models/Users.js";
 import { FetchProxy as fetch } from "@storyteller/tauri-utils";
 
@@ -27,10 +27,10 @@ export class UsersApi extends ApiManager {
 
     const response = await fetch(endpoint, {
       method,
-      headers: {
+      headers: buildSessionHeaders({
         Accept: "application/json",
         "Content-Type": "application/json",
-      },
+      }),
       credentials: "include",
       body: bodyInString,
     });
@@ -141,6 +141,9 @@ export class UsersApi extends ApiManager {
         method: "POST",
         body: body,
       });
+      if (response.success && response.signed_session) {
+        storeSignedSession(response.signed_session);
+      }
       return {
         success: response.success,
         data: response.success
@@ -157,6 +160,7 @@ export class UsersApi extends ApiManager {
   }
 
   public Logout(): Promise<ApiResponse<null>> {
+    clearSignedSession();
     const endpoint = `${this.getApiSchemeAndHost()}/v1/logout`;
     return this.post<null, { success: boolean; error_message?: string }>({
       endpoint: endpoint,
@@ -245,6 +249,9 @@ export class UsersApi extends ApiManager {
         body: body,
       });
 
+      if (response.success && response.signed_session) {
+        storeSignedSession(response.signed_session);
+      }
       return {
         success: response.success,
         data: response.success

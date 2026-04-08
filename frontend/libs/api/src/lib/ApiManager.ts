@@ -4,6 +4,40 @@ import { API_TARGETS } from "./enums/Api.js";
 //import { fetch } from '@tauri-apps/plugin-http'
 import { FetchProxy as fetch } from "@storyteller/tauri-utils";
 
+const SESSION_STORAGE_KEY = "artcraft_signed_session";
+
+/** Store a signed session JWT for use as a header fallback (mobile browsers block 3rd-party cookies). */
+export function storeSignedSession(signedSession: string) {
+  try {
+    localStorage.setItem(SESSION_STORAGE_KEY, signedSession);
+  } catch { /* localStorage unavailable */ }
+}
+
+/** Clear stored session (on logout). */
+export function clearSignedSession() {
+  try {
+    localStorage.removeItem(SESSION_STORAGE_KEY);
+  } catch { /* localStorage unavailable */ }
+}
+
+/** Get the stored session token, if any. */
+export function getSignedSession(): string | null {
+  try {
+    return localStorage.getItem(SESSION_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+/** Build headers with session fallback for mobile browsers. */
+export function buildSessionHeaders(base: Record<string, string>): Record<string, string> {
+  const session = getSignedSession();
+  if (session) {
+    return { ...base, session };
+  }
+  return base;
+}
+
 type NonNullableObject<T extends object> = NonNullable<T>;
 
 export interface ApiResponse<T, P = undefined> {
@@ -62,10 +96,10 @@ export class ApiManager {
 
     const response = await fetch(endpointWithQueries, {
       method,
-      headers: {
+      headers: buildSessionHeaders({
         Accept: "application/json",
         "Content-Type": "application/json",
-      },
+      }),
       credentials: "include",
       body: bodyInString,
     });
@@ -89,9 +123,9 @@ export class ApiManager {
   ): Promise<T> {
     const response = await fetch(endpoint, {
       method,
-      headers: {
+      headers: buildSessionHeaders({
         Accept: "application/json",
-      },
+      }),
       credentials: "include",
       body: body,
     });

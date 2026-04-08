@@ -1,4 +1,4 @@
-import { ApiManager, ApiResponse } from "./ApiManager.js";
+import { ApiManager, ApiResponse, buildSessionHeaders } from "./ApiManager.js";
 import { FetchProxy as fetch } from "@storyteller/tauri-utils";
 
 export class PasswordResetApi extends ApiManager {
@@ -61,10 +61,10 @@ export class PasswordResetApi extends ApiManager {
     try {
       const response = await fetch(endpoint, {
         method: "POST",
-        headers: {
+        headers: buildSessionHeaders({
           Accept: "application/json",
           "Content-Type": "application/json",
-        },
+        }),
         credentials: "include",
         body: JSON.stringify(body),
       });

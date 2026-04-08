@@ -1,4 +1,4 @@
-import { ApiManager, ApiResponse } from "./ApiManager.js";
+import { ApiManager, ApiResponse, buildSessionHeaders } from "./ApiManager.js";
 import { Prompts } from "./models/Prompts.js";
 import { FetchProxy as fetch } from "@storyteller/tauri-utils";
 
@@ -209,9 +209,9 @@ export class PromptsApi extends ApiManager {
 
     const response = await fetch(endpoint, {
       method: "POST",
-      headers: {
+      headers: buildSessionHeaders({
         Accept: "application/json",
-      },
+      }),
       credentials: "include",
       body: formData,
     });
