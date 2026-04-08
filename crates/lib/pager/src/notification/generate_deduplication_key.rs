@@ -63,7 +63,11 @@ mod tests {
       media_file_token: None,
       inference_job_token: None,
       third_party_id: None,
+      request_ip_address: None,
+      avt_cookie_token: None,
+      session_token: None,
       maybe_error: None,
+      session_user_token: None,
     }
   }
 
@@ -223,7 +227,11 @@ mod tests {
         media_file_token: None,
         inference_job_token: None,
         third_party_id: None,
+        request_ip_address: None,
+        avt_cookie_token: None,
+        session_token: None,
         maybe_error: None,
+        session_user_token: None,
       }
     }
 
