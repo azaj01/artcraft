@@ -3,6 +3,7 @@ import { UserInfo, ActiveSubscriptions } from "~/models";
 import { authentication, flushAllBackgroundLoadedMedia } from "~/signals";
 import { useCreditsState } from "@storyteller/credits";
 import { useSubscriptionState } from "@storyteller/subscription";
+import { clearGalleryCache } from "@storyteller/ui-gallery-modal";
 
 export const updateAuthStatus = (newStatus: AUTH_STATUS) => {
   console.log('updateAuthStatus()', newStatus)
@@ -40,4 +41,5 @@ export const setLogoutStates = () => {
   flushAllBackgroundLoadedMedia();
   useCreditsState.getState().reset();
   useSubscriptionState.getState().reset();
+  clearGalleryCache();
 };

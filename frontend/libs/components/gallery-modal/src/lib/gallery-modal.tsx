@@ -70,17 +70,19 @@ interface GalleryCacheEntry {
 }
 
 const galleryCacheMap = new Map<string, GalleryCacheEntry>();
-let cachedUsername: string | null = null;
 const usersApiSingleton = new UsersApi();
 
-/** Get cached username or fetch it once. */
-async function getCachedUsername(): Promise<string | null> {
-  if (cachedUsername) return cachedUsername;
+/** Clear the module-level gallery item cache. Call on logout so the next user doesn't see stale items. */
+export const clearGalleryCache = () => {
+  galleryCacheMap.clear();
+};
+
+/** Fetch the current session's username fresh every time — the session may have changed (logout/login). */
+async function fetchCurrentUsername(): Promise<string | null> {
   try {
     const session = await usersApiSingleton.GetSession();
     if (session.success && session.data?.user) {
-      cachedUsername = session.data.user.username;
-      return cachedUsername;
+      return session.data.user.username;
     }
   } catch {
     // ignore
@@ -481,24 +483,52 @@ export const GalleryModal = React.memo(
       failedImageUrls.current.add(url);
     }, []);
 
-    // Fetch & cache username — uses module-level cache so subsequent opens are instant
+    // Ref to the latest refreshGallery so the async session-fetch effect can
+    // call it without taking a dependency on it. refreshGallery itself is
+    // defined lower in the file (it needs loadItems); we wire the ref via a
+    // layout-time assignment below.
+    const refreshGalleryRef = useRef<() => void>(() => {});
+
+    // Fetch the current session's username every time the modal opens.
+    // The modal is permanently mounted in TopBar, so this component survives
+    // logout → login. We re-verify who the backend considers the current user
+    // on every open and, if it's a different user, wipe all stale state before
+    // letting refreshGallery fire. This effect is the SOLE driver for refresh
+    // on modal-open — the separate filter/username effect below intentionally
+    // does NOT depend on modal-open signals, so it can't race this one.
     useEffect(() => {
-      const getUsername = async () => {
-        if (username) return; // already have it
+      const modalIsOpen =
+        isOpen || (mode === "view" && galleryModalVisibleViewMode.value);
+      if (!modalIsOpen) return;
+      let cancelled = false;
+      (async () => {
         setUsernameError(false);
-        const name = await getCachedUsername();
-        if (name) {
-          setInitialLoading(true); // keep skeleton alive until refreshGallery takes over
-          setUsername(name);
-          // refreshGallery (triggered by username state change) handles initialLoading
-        } else {
+        const name = await fetchCurrentUsername();
+        if (cancelled) return;
+        if (!name) {
           setUsernameError(true);
+          setInitialLoading(false);
+          return;
         }
+        if (name !== usernameRef.current) {
+          // Different user than before — wipe everything from the previous
+          // session. setUsername will trigger the filter/username effect
+          // below, which calls refreshGallery with the new identity.
+          galleryCacheMap.clear();
+          setAllItems([]);
+          setPageIndex(0);
+          setHasMore(true);
+          setInitialLoading(true);
+          setUsername(name);
+        } else {
+          // Same user reopening — just refresh (shows cache + background refetch).
+          refreshGalleryRef.current();
+        }
+      })();
+      return () => {
+        cancelled = true;
       };
-      if (isOpen || (mode === "view" && galleryModalVisibleViewMode.value)) {
-        getUsername();
-      }
-    }, [mode, galleryModalVisibleViewMode.value, isOpen, username, usernameRetryCount]);
+    }, [mode, galleryModalVisibleViewMode.value, isOpen, usernameRetryCount]);
 
     // Helper to build the cache key for the current filter
     const getCacheKey = useCallback(
@@ -651,6 +681,7 @@ export const GalleryModal = React.memo(
     );
 
     // refresh logic — shows cached items immediately, then background-refreshes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const refreshGallery = useCallback(() => {
       setItemsLoadError(null);
       const cacheKey = `gallery_${activeFilterRef.current}`;
@@ -674,8 +705,17 @@ export const GalleryModal = React.memo(
       }
     }, [loadItems]);
 
+    // Keep the ref pointed at the latest refreshGallery so the session-fetch
+    // effect can call it without taking it as a dep (avoids tearing).
+    refreshGalleryRef.current = refreshGallery;
+
+    // Refresh on username change (new user logged in via the session-fetch
+    // effect) or on activeFilter change. This effect deliberately does NOT
+    // depend on modal-open signals — the session-fetch effect above is the
+    // sole driver for modal-open refreshes, which prevents a race where this
+    // effect would otherwise fire synchronously with a stale `username` and
+    // take the loading lock before the new session resolves.
     useEffect(() => {
-      // Refresh every time the modal is opened
       const modalIsOpen =
         mode === "view"
           ? galleryModalVisibleViewMode.value
@@ -686,13 +726,7 @@ export const GalleryModal = React.memo(
         refreshGallery();
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-      mode,
-      isOpen,
-      galleryModalVisibleViewMode.value,
-      username,
-      activeFilter,
-    ]);
+    }, [username, activeFilter]);
 
     // Auto-refresh when a generation completes while the gallery is open
     const modalIsOpenRef = useRef(false);
