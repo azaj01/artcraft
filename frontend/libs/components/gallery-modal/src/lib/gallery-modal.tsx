@@ -575,11 +575,15 @@ export const GalleryModal = React.memo(
               .map(mapApiItem);
 
             if (reset) {
-              // Smart merge: update existing items in-place (preserves
-              // scroll position), prepend brand-new items, and DROP items
-              // the server no longer returns (e.g. just-deleted).
+              // Smart merge: refresh existing items in place, prepend brand
+              // new ones, and keep any items older than the fresh page
+              // window (those live on later pages and aren't in this fetch).
+              // NB: we can't blindly drop items missing from `newItems` —
+              // that would evict everything loaded by infinite scroll.
+              // Deletions are handled live via `media_file_deleted_event`.
               setAllItems((prev) => {
                 if (prev.length === 0) return newItems;
+                if (newItems.length === 0) return prev;
                 const existingIds = new Set(prev.map((it) => it.id));
                 const brandNew = newItems.filter(
                   (it: GalleryItem) => !existingIds.has(it.id),
@@ -587,8 +591,25 @@ export const GalleryModal = React.memo(
                 const freshMap = new Map(
                   newItems.map((it: GalleryItem) => [it.id, it] as const),
                 );
+                // The server returns newest-first, so anything older than
+                // the oldest item in this fresh page is on a later page.
+                const oldestFreshTs = Math.min(
+                  ...newItems.map((it: GalleryItem) =>
+                    new Date(it.createdAt).getTime(),
+                  ),
+                );
                 const updated = prev
-                  .map((it) => freshMap.get(it.id))
+                  .map((it) => {
+                    const fresh = freshMap.get(it.id);
+                    if (fresh) return fresh;
+                    // Not in fresh window but older — came from a later
+                    // page via infinite scroll; keep it.
+                    if (new Date(it.createdAt).getTime() < oldestFreshTs) {
+                      return it;
+                    }
+                    // In the fresh window and missing → server dropped it.
+                    return undefined;
+                  })
                   .filter((it): it is GalleryItem => it !== undefined);
                 return [...brandNew, ...updated];
               });

@@ -82,7 +82,6 @@ export const GalleryDraggableItem: React.FC<GalleryDraggableItemProps> = ({
             return;
           }
           onDeleted?.(item.id);
-          toast.success("Deleted.");
         } catch (err) {
           console.error("MediaFileDelete threw:", err);
           toast.error(

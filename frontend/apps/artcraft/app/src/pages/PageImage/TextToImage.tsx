@@ -5,7 +5,7 @@ import {
   THUMBNAIL_SIZES,
 } from "@storyteller/common";
 import { PromptBoxImage } from "@storyteller/ui-promptbox";
-import { uploadImage } from "../../components/reusable/UploadModalMedia/uploadImage";
+import { UploadImageMedia } from "@storyteller/api";
 import BackgroundGallery from "./BackgroundGallery";
 import { listen, UnlistenFn } from "@tauri-apps/api/event";
 import {
@@ -378,7 +378,7 @@ const TextToImage = ({ imageMediaId, imageUrl }: TextToImageProps) => {
                 useJobContext={() => {
                   return jobContext;
                 }}
-                uploadImage={uploadImage}
+                uploadImage={UploadImageMedia}
                 selectedModel={selectedImageModel}
                 selectedProvider={selectedProvider}
                 imageMediaId={imageMediaId}
