@@ -10,10 +10,21 @@ use fal_client::requests::webhook::video::image::enqueue_veo_2_image_to_video_we
 };
 
 #[derive(Debug, Clone)]
+pub enum FalVeo2Mode {
+  TextToVideo,
+  ImageToVideo {
+    image_url: String,
+  },
+}
+
+#[derive(Debug, Clone)]
 pub struct PlanFalVeo2 {
   pub prompt: String,
-  pub start_frame_url: String,
-  pub aspect_ratio: Veo2AspectRatio,
+  pub negative_prompt: Option<String>,
+  pub mode: FalVeo2Mode,
+  /// Only set for text-to-video. Image-to-video inherits the source frame's
+  /// aspect ratio and doesn't accept this parameter.
+  pub aspect_ratio: Option<Veo2AspectRatio>,
   pub duration: Veo2Duration,
 }
 
@@ -22,33 +33,35 @@ pub fn plan_generate_video_fal_veo_2<'a>(
 ) -> Result<VideoGenerationPlan<'a>, ArtcraftRouterError> {
   let strategy = request.request_mismatch_mitigation_strategy;
 
-  let start_frame_url = resolve_required_image_url(request.start_frame, "start_frame")?;
   if request.end_frame.is_some() {
     return Err(unsupported("end_frame", "Veo 2 does not support an ending frame"));
   }
 
-  let aspect_ratio = plan_aspect_ratio(request.aspect_ratio, strategy)?;
+  let mode = match request.start_frame {
+    Some(ImageRef::Url(url)) => FalVeo2Mode::ImageToVideo {
+      image_url: url.to_string(),
+    },
+    Some(ImageRef::MediaFileToken(_)) => {
+      return Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls));
+    }
+    None => FalVeo2Mode::TextToVideo,
+  };
+
+  // Aspect ratio only applies to text-to-video; image-to-video inherits
+  // the source frame's aspect ratio.
+  let aspect_ratio = match &mode {
+    FalVeo2Mode::TextToVideo => Some(plan_aspect_ratio(request.aspect_ratio, strategy)?),
+    FalVeo2Mode::ImageToVideo { .. } => None,
+  };
   let duration = plan_duration(request.duration_seconds, strategy)?;
 
   Ok(VideoGenerationPlan::FalVeo2(PlanFalVeo2 {
     prompt: request.prompt.unwrap_or("").to_string(),
-    start_frame_url,
+    negative_prompt: request.negative_prompt.map(|s| s.to_string()),
+    mode,
     aspect_ratio,
     duration,
   }))
-}
-
-fn resolve_required_image_url(
-  image_ref: Option<ImageRef<'_>>,
-  field: &'static str,
-) -> Result<String, ArtcraftRouterError> {
-  match image_ref {
-    Some(ImageRef::Url(url)) => Ok(url.to_string()),
-    Some(ImageRef::MediaFileToken(_)) => {
-      Err(ArtcraftRouterError::Client(ClientError::FalOnlySupportsUrls))
-    }
-    None => Err(unsupported(field, "Veo 2 requires a starting frame")),
-  }
 }
 
 fn plan_aspect_ratio(
@@ -60,6 +73,7 @@ fn plan_aspect_ratio(
     None
     | Some(CommonAspectRatio::Auto)
     | Some(CommonAspectRatio::Auto2k)
+    | Some(CommonAspectRatio::Auto3k)
     | Some(CommonAspectRatio::Auto4k) => Ok(Ar::Auto),
 
     Some(CommonAspectRatio::WideSixteenByNine) | Some(CommonAspectRatio::Wide) => Ok(Ar::WideSixteenNine),

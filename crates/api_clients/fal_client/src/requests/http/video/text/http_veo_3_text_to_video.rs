@@ -2,12 +2,10 @@ use crate::requests::api::fal_request::FalRequest;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Default)]
-pub struct Veo3FastImageToVideoInput {
-  pub image_url: String,
-
+pub struct Veo3TextToVideoInput {
   pub prompt: String,
 
-  /// Options: "auto", "16:9", "9:16"
+  /// Options: "16:9", "9:16"
   #[serde(skip_serializing_if = "Option::is_none")]
   pub aspect_ratio: Option<String>,
 
@@ -21,20 +19,23 @@ pub struct Veo3FastImageToVideoInput {
 
   #[serde(skip_serializing_if = "Option::is_none")]
   pub generate_audio: Option<bool>,
+
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub negative_prompt: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Veo3FastImageToVideoVideoFile {
+pub struct Veo3TextToVideoVideoFile {
   pub url: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Veo3FastImageToVideoOutput {
-  pub video: Veo3FastImageToVideoVideoFile,
+pub struct Veo3TextToVideoOutput {
+  pub video: Veo3TextToVideoVideoFile,
 }
 
-pub fn veo_3_fast_image_to_video(
-  params: Veo3FastImageToVideoInput,
-) -> FalRequest<Veo3FastImageToVideoInput, Veo3FastImageToVideoOutput> {
-  FalRequest::new("fal-ai/veo3/fast/image-to-video", params)
+pub fn veo_3_text_to_video(
+  params: Veo3TextToVideoInput,
+) -> FalRequest<Veo3TextToVideoInput, Veo3TextToVideoOutput> {
+  FalRequest::new("fal-ai/veo3", params)
 }
