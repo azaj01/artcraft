@@ -11,6 +11,11 @@ import {
   faPenNib,
   faCrosshairs,
 } from "@fortawesome/pro-solid-svg-icons";
+import { useMemo } from "react";
+import {
+  useExperimentalStore,
+  useStoryboardPageEnabled,
+} from "@storyteller/ui-settings-modal";
 import { useTabStore, TabId } from "~/pages/Stores/TabState";
 import { set3DPageMounted } from "~/pages/PageEnigma/Editor/editor";
 
@@ -26,7 +31,8 @@ export type AppId =
   | "IMAGE_TO_3D_OBJECT"
   | "IMAGE_TO_3D_WORLD"
   | "REMOVE_BACKGROUND"
-  | "ANGLES";
+  | "ANGLES"
+  | "STORYBOARD";
 
 export interface AppDescriptor {
   id: AppId;
@@ -171,6 +177,16 @@ export const ALL_APPS: FullAppItem[] = [
   },
 
   {
+    id: "storyboard",
+    label: "Storyboard",
+    description: "Plan your shots with a visual storyboard",
+    icon: faPhotoFilm,
+    category: "generate",
+    action: "STORYBOARD",
+    color: "bg-fuchsia-600/40",
+    badge: "NEW",
+  },
+  {
     id: "2d-canvas",
     label: "Image Editor",
     description: "Easy edits. Great for graphic design.",
@@ -194,6 +210,33 @@ export const GENERATE_APPS = ALL_APPS.filter(
   (app) => app.category === "generate",
 );
 export const EDIT_APPS = ALL_APPS.filter((app) => app.category === "edit");
+
+export const useVisibleApps = (): FullAppItem[] => {
+  const storyboardEnabled = useStoryboardPageEnabled();
+  return useMemo(
+    () =>
+      ALL_APPS.filter((app) =>
+        app.action === "STORYBOARD" ? storyboardEnabled : true,
+      ),
+    [storyboardEnabled],
+  );
+};
+
+export const useGenerateApps = (): FullAppItem[] => {
+  const visible = useVisibleApps();
+  return useMemo(
+    () => visible.filter((app) => app.category === "generate"),
+    [visible],
+  );
+};
+
+export const useEditApps = (): FullAppItem[] => {
+  const visible = useVisibleApps();
+  return useMemo(
+    () => visible.filter((app) => app.category === "edit"),
+    [visible],
+  );
+};
 
 export const getBadgeStyles = (badge?: string) => {
   switch (badge) {
@@ -223,8 +266,14 @@ export const goToApp = (action?: string) => {
       "IMAGE_TO_3D_WORLD",
       "REMOVE_BACKGROUND",
       "ANGLES",
+      "STORYBOARD",
     ].includes(action)
   ) {
+    if (action === "STORYBOARD") {
+      const { enabled, storyboardPageEnabled } =
+        useExperimentalStore.getState();
+      if (!enabled || !storyboardPageEnabled) return;
+    }
     if (action === "3D") {
       set3DPageMounted(true);
     } else {
