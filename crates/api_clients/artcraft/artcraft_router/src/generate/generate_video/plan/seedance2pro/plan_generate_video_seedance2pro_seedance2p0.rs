@@ -9,7 +9,7 @@ use crate::errors::client_error::ClientError;
 use crate::generate::generate_video::generate_video_request::GenerateVideoRequest;
 use crate::generate::generate_video::video_generation_plan::VideoGenerationPlan;
 use seedance2pro_client::requests::generate_video::generate_video::{
-  GenerateVideoRequest as SeedanceGenerateVideoRequest,
+  KinoviGenerateVideoRequest as SeedanceGenerateVideoRequest,
   KinoviBatchCount, KinoviModelType, KinoviOutputResolution, KinoviAspectRatio,
 };
 

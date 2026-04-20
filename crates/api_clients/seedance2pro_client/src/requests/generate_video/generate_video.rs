@@ -15,7 +15,7 @@ use wreq_util::Emulation;
 
 /// Video generation parameters (no session/host info).
 #[derive(Clone)]
-pub struct GenerateVideoRequest {
+pub struct KinoviGenerateVideoRequest {
   /// Seedance 2.0 Pro vs Fast
   pub model_type: KinoviModelType,
 
@@ -64,14 +64,14 @@ pub struct GenerateVideoRequest {
   pub use_face_blur_hack: Option<bool>,
 }
 
-/// Wrapper that bundles a [`GenerateVideoRequest`] with session and host info.
+/// Wrapper that bundles a [`KinoviGenerateVideoRequest`] with session and host info.
 pub struct GenerateVideoArgs<'a> {
-  pub request: GenerateVideoRequest,
+  pub request: KinoviGenerateVideoRequest,
   pub session: &'a Seedance2ProSession,
   pub host_override: Option<KinoviHost>,
 }
 
-impl std::fmt::Debug for GenerateVideoRequest {
+impl std::fmt::Debug for KinoviGenerateVideoRequest {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("GenerateVideoRequest")
       .field("model_type", &self.model_type)
@@ -100,7 +100,7 @@ impl std::fmt::Debug for GenerateVideoArgs<'_> {
   }
 }
 
-impl GenerateVideoRequest {
+impl KinoviGenerateVideoRequest {
   /// Estimates the credit cost for this generation request.
   ///
   /// Pricing is per-second × batch count, with the per-second rate
@@ -440,8 +440,8 @@ mod tests {
       duration_seconds: u8,
       batch_count: KinoviBatchCount,
       output_resolution: Option<KinoviOutputResolution>,
-    ) -> GenerateVideoRequest {
-      GenerateVideoRequest {
+    ) -> KinoviGenerateVideoRequest {
+      KinoviGenerateVideoRequest {
         model_type,
         prompt: String::new(),
         aspect_ratio: KinoviAspectRatio::Square1x1,
@@ -458,19 +458,19 @@ mod tests {
       }
     }
 
-    fn pro(dur: u8, batch: KinoviBatchCount) -> GenerateVideoRequest {
+    fn pro(dur: u8, batch: KinoviBatchCount) -> KinoviGenerateVideoRequest {
       make_args(KinoviModelType::Seedance2Pro, dur, batch, None)
     }
 
-    fn pro_res(dur: u8, batch: KinoviBatchCount, res: KinoviOutputResolution) -> GenerateVideoRequest {
+    fn pro_res(dur: u8, batch: KinoviBatchCount, res: KinoviOutputResolution) -> KinoviGenerateVideoRequest {
       make_args(KinoviModelType::Seedance2Pro, dur, batch, Some(res))
     }
 
-    fn fast(dur: u8, batch: KinoviBatchCount) -> GenerateVideoRequest {
+    fn fast(dur: u8, batch: KinoviBatchCount) -> KinoviGenerateVideoRequest {
       make_args(KinoviModelType::Seedance2Fast, dur, batch, None)
     }
 
-    fn fast_res(dur: u8, batch: KinoviBatchCount, res: KinoviOutputResolution) -> GenerateVideoRequest {
+    fn fast_res(dur: u8, batch: KinoviBatchCount, res: KinoviOutputResolution) -> KinoviGenerateVideoRequest {
       make_args(KinoviModelType::Seedance2Fast, dur, batch, Some(res))
     }
 
@@ -627,7 +627,7 @@ mod tests {
       let baseline = pro(5, KinoviBatchCount::One).estimate_credits();
 
       for res in &resolutions {
-        let req = GenerateVideoRequest {
+        let req = KinoviGenerateVideoRequest {
           model_type: KinoviModelType::Seedance2Pro,
           prompt: String::new(),
           aspect_ratio: *res,
@@ -732,7 +732,7 @@ mod tests {
       let args = GenerateVideoArgs {
         session: &session,
         host_override: None,
-        request: GenerateVideoRequest {
+        request: KinoviGenerateVideoRequest {
           model_type: KinoviModelType::Seedance2Pro,
           prompt: "A corgi eating a cake in a fancy kitchen.".to_string(),
           aspect_ratio: KinoviAspectRatio::Square1x1,
@@ -765,7 +765,7 @@ mod tests {
       let args = GenerateVideoArgs {
         session: &session,
         host_override: None,
-        request: GenerateVideoRequest {
+        request: KinoviGenerateVideoRequest {
           model_type: KinoviModelType::Seedance2Pro,
           prompt: "A dog shakes the glasses off its head. The camera pans out as the shiba shakes. The shiba barks.".to_string(),
           aspect_ratio: KinoviAspectRatio::Landscape16x9,
@@ -797,7 +797,7 @@ mod tests {
       let args = GenerateVideoArgs {
         session: &session,
         host_override: None,
-        request: GenerateVideoRequest {
+        request: KinoviGenerateVideoRequest {
           model_type: KinoviModelType::Seedance2Pro,
           prompt: "The dog in @2 is in the office at @1 without the man. The office is dark and moonlight streams in through the windows. Particles of dust gleam in the moon beams. Suddenly, the dog jumps walks in front of the desk and barks.".to_string(),
           aspect_ratio: KinoviAspectRatio::Standard4x3,
@@ -832,7 +832,7 @@ mod tests {
       let args = GenerateVideoArgs {
         session: &session,
         host_override: None,
-        request: GenerateVideoRequest {
+        request: KinoviGenerateVideoRequest {
           model_type: KinoviModelType::Seedance2Pro,
           prompt: "Change the Video @video1 to night time.".to_string(),
           aspect_ratio: KinoviAspectRatio::Landscape16x9,
@@ -866,7 +866,7 @@ mod tests {
       let args = GenerateVideoArgs {
         session: &session,
         host_override: None,
-        request: GenerateVideoRequest {
+        request: KinoviGenerateVideoRequest {
           model_type: KinoviModelType::Seedance2Pro,
           prompt: "Put the robot in @video1 next to the house in @image1".to_string(),
           aspect_ratio: KinoviAspectRatio::Landscape16x9,
@@ -926,7 +926,7 @@ mod tests {
       let args = GenerateVideoArgs {
         session: &session,
         host_override: None,
-        request: GenerateVideoRequest {
+        request: KinoviGenerateVideoRequest {
           model_type: KinoviModelType::Seedance2Pro,
           prompt: "Change @video1 to night time".to_string(),
           aspect_ratio: KinoviAspectRatio::Landscape16x9,
@@ -981,7 +981,7 @@ mod tests {
       let args = GenerateVideoArgs {
         session: &session,
         host_override: None,
-        request: GenerateVideoRequest {
+        request: KinoviGenerateVideoRequest {
           model_type: KinoviModelType::Seedance2Pro,
           prompt: "The corgi dog watches the lake.".to_string(),
           aspect_ratio: KinoviAspectRatio::Portrait9x16,
@@ -1036,7 +1036,7 @@ mod tests {
       let args = GenerateVideoArgs {
         session: &session,
         host_override: None,
-        request: GenerateVideoRequest {
+        request: KinoviGenerateVideoRequest {
           model_type: KinoviModelType::Seedance2Fast,
           prompt: "A corgi dog runs along the lake shore, splashing water. Camera follows.".to_string(),
           aspect_ratio: KinoviAspectRatio::Landscape16x9,
@@ -1098,7 +1098,7 @@ mod tests {
       let args = GenerateVideoArgs {
         session: &session,
         host_override: None,
-        request: GenerateVideoRequest {
+        request: KinoviGenerateVideoRequest {
           model_type: KinoviModelType::Seedance2Fast,
           prompt: "The dog in @1 is running through the scenery in @3 towards the building in @2. Golden hour lighting.".to_string(),
           aspect_ratio: KinoviAspectRatio::Landscape16x9,
@@ -1153,7 +1153,7 @@ mod tests {
       let args = GenerateVideoArgs {
         session: &session,
         host_override: None,
-        request: GenerateVideoRequest {
+        request: KinoviGenerateVideoRequest {
           model_type: KinoviModelType::Seedance2Fast,
           prompt: "A fantasy forest with mushrooms glowing in the dark. Fireflies dance between the trees. A small character walks along a winding path.".to_string(),
           aspect_ratio: KinoviAspectRatio::Landscape16x9,
@@ -1192,7 +1192,7 @@ mod tests {
         let args = GenerateVideoArgs {
           session: &session,
           host_override: None,
-          request: GenerateVideoRequest {
+          request: KinoviGenerateVideoRequest {
             model_type: KinoviModelType::Seedance2Pro,
             prompt: "@Steampunk Clown is juggling flaming torches in a circus tent.".to_string(),
             aspect_ratio: KinoviAspectRatio::Landscape16x9,
@@ -1225,7 +1225,7 @@ mod tests {
         let args = GenerateVideoArgs {
           session: &session,
           host_override: None,
-          request: GenerateVideoRequest {
+          request: KinoviGenerateVideoRequest {
             model_type: KinoviModelType::Seedance2Fast,
             prompt: "@Mochi the female shiba inu is eating a cheese pizza while standing on the table".to_string(),
             aspect_ratio: KinoviAspectRatio::Portrait9x16,
@@ -1258,7 +1258,7 @@ mod tests {
         let args = GenerateVideoArgs {
           session: &session,
           host_override: None,
-          request: GenerateVideoRequest {
+          request: KinoviGenerateVideoRequest {
             model_type: KinoviModelType::Seedance2Pro,
             prompt: "@Steampunk Clown is walking up to pet a dog on the couch.".to_string(),
             aspect_ratio: KinoviAspectRatio::Landscape16x9,
@@ -1293,7 +1293,7 @@ mod tests {
         let args = GenerateVideoArgs {
           session: &session,
           host_override: None,
-          request: GenerateVideoRequest {
+          request: KinoviGenerateVideoRequest {
             model_type: KinoviModelType::Seedance2Fast,
             prompt: "@Steampunk Clown and @Mochi are playing fetch in a sunny park.".to_string(),
             aspect_ratio: KinoviAspectRatio::Landscape16x9,
@@ -1340,7 +1340,7 @@ mod tests {
       GenerateVideoArgs {
         session,
         host_override: None,
-        request: GenerateVideoRequest {
+        request: KinoviGenerateVideoRequest {
           model_type,
           prompt: prompt.to_string(),
           aspect_ratio: KinoviAspectRatio::Landscape16x9,

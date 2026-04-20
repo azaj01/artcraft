@@ -39,7 +39,7 @@ use pager::notification::notification_details_builder::NotificationDetailsBuilde
 use pager::notification::notification_urgency::NotificationUrgency;
 use seedance2pro_client::creds::seedance2pro_session::Seedance2ProSession;
 use seedance2pro_client::requests::generate_video::generate_video::{
-  generate_video, KinoviBatchCount, GenerateVideoArgs, GenerateVideoRequest, GenerateVideoResponse, KinoviModelType, KinoviOutputResolution, KinoviAspectRatio,
+  generate_video, KinoviBatchCount, GenerateVideoArgs, KinoviGenerateVideoRequest, GenerateVideoResponse, KinoviModelType, KinoviOutputResolution, KinoviAspectRatio,
 };
 use seedance2pro_client::requests::prepare_file_upload::prepare_file_upload::{
   prepare_file_upload, PrepareFileUploadArgs,
@@ -497,7 +497,7 @@ fn estimate_cost_upfront(
   batch_count: KinoviBatchCount,
   duration_seconds: u8,
 ) -> u64 {
-  let request = GenerateVideoRequest {
+  let request = KinoviGenerateVideoRequest {
     model_type: KinoviModelType::Seedance2Pro,
     prompt: String::new(),
     aspect_ratio,
@@ -591,7 +591,7 @@ async fn upload_and_generate(
   let video_gen_args = GenerateVideoArgs {
     session,
     host_override: None,
-    request: GenerateVideoRequest {
+    request: KinoviGenerateVideoRequest {
       model_type: KinoviModelType::Seedance2Pro,
       prompt,
       aspect_ratio,

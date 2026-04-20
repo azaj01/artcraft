@@ -14,7 +14,7 @@ use enums::common::generation::common_generation_mode::CommonGenerationMode;
 use enums::common::generation::common_resolution::CommonResolution;
 use enums::common::generation::common_video_model::CommonVideoModel;
 use seedance2pro_client::creds::seedance2pro_session::Seedance2ProSession;
-use seedance2pro_client::requests::generate_video::generate_video::{generate_video, GenerateVideoArgs, GenerateVideoRequest, KinoviBatchCount, KinoviModelType, KinoviAspectRatio, KinoviOutputResolution};
+use seedance2pro_client::requests::generate_video::generate_video::{generate_video, GenerateVideoArgs, KinoviGenerateVideoRequest, KinoviBatchCount, KinoviModelType, KinoviAspectRatio, KinoviOutputResolution};
 use seedance2pro_client::requests::prepare_file_upload::prepare_file_upload::{
   prepare_file_upload, PrepareFileUploadArgs,
 };
@@ -137,7 +137,7 @@ async fn execute_generation_kinovi_inner(
     KinoviModelType::Seedance2Fast => request.resolution.map(|res| map_common_resolution_to_kinovi_fast(res)),
   };
 
-  let request = GenerateVideoRequest {
+  let request = KinoviGenerateVideoRequest {
     model_type,
     prompt,
     aspect_ratio,
