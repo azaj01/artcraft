@@ -175,6 +175,7 @@ pub async fn omni_gen_video_generate_handler(
   };
 
   let pipeline_result = if use_v2 {
+    info!("Using pipeline v2");
     run_pipeline_v2(RunPipelineV2Args {
       router_builder: &router_builder,
       server_state: &server_state,
@@ -184,6 +185,7 @@ pub async fn omni_gen_video_generate_handler(
       kinovi_character_id_map: &kinovi_character_id_map,
     }).await?
   } else {
+    info!("Using pipeline v1");
     run_pipeline_v1(RunPipelineV1Args {
       request: &request,
       router_builder: &router_builder,
@@ -281,6 +283,7 @@ pub async fn omni_gen_video_generate_handler(
 
   let job_token = match &pipeline_result.response {
     GenerateVideoResponse::Seedance2Pro(payload) => {
+      info!("Inserting seedance2pro job(s) with token: {:?}", pipeline_result.billing.apriori_job_token);
       insert_seedance2pro_jobs(InsertSeedance2proJobsArgs {
         primary_order_id: &payload.order_id,
         maybe_additional_order_ids: payload.maybe_order_ids.as_deref(),
@@ -301,6 +304,7 @@ pub async fn omni_gen_video_generate_handler(
         error!("Fal generation response missing request_id");
         AdvancedCommonWebError::server_error_with_message("Fal generation response missing request_id")
       })?;
+      info!("Inserting fal job with token: {:?}", pipeline_result.billing.apriori_job_token);
       insert_fal_job(InsertFalJobArgs {
         external_job_id: external_id,
         shared: SharedJobArgs {
