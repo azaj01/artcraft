@@ -186,6 +186,7 @@ const MODEL_DISPLAY_NAMES: Record<string, string> = {
   seedance_1p0_lite: "Seedance 1.0 Lite",
   seedance_1p5_pro: "Seedance 1.5 Pro",
   seedance_2p0: "Seedance 2.0",
+  happy_horse_1p0: "Happy Horse 1.0",
   sora_2: "Sora 2",
   sora_2_pro: "Sora 2 Pro",
   veo_2: "Google Veo 2",

@@ -78,6 +78,8 @@ export const MODEL_TYPE_TO_CREATOR: Record<string, ModelCreator> = {
   // Angles
   flux_2_lora_angles: ModelCreator.BlackForestLabs,
   qwen_edit_2511_angles: ModelCreator.Alibaba,
+  // Happy Horse (Alibaba wanvideo)
+  happy_horse_1p0: ModelCreator.Alibaba,
 };
 
 // Get creator icon for a model type
@@ -191,6 +193,9 @@ export const getModelDisplayName = (modelType: string): string => {
     seedance_2p0_fast: "Seedance 2.0 Fast",
     // Seedance — dot-normalized aliases
     seedance_1_0_lite: "Seedance 1.0 Lite",
+
+    // Happy Horse (Alibaba wanvideo)
+    happy_horse_1p0: "Happy Horse 1.0",
 
     // Seedream (ByteDance)
     seedream_4: "Seedream 4",
