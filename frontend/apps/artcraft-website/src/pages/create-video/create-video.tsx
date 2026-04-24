@@ -209,11 +209,27 @@ export default function CreateVideo() {
   );
   const [isGenerating, setIsGenerating] = useState(false);
 
-  // Reference media
-  const [referenceImages, setReferenceImages] = useState<RefImage[]>([]);
-  const [endFrameImage, setEndFrameImage] = useState<RefImage | undefined>();
-  const [referenceVideos, setReferenceVideos] = useState<RefVideo[]>([]);
-  const [referenceAudios, setReferenceAudios] = useState<RefAudio[]>([]);
+  // Reference media (persisted in store so refs survive navigation)
+  const refs = useCreateVideoStore((s) => s.refs);
+  const setRefs = useCreateVideoStore((s) => s.setRefs);
+  const { referenceImages, endFrameImage, referenceVideos, referenceAudios } =
+    refs;
+  const setReferenceImages = useCallback(
+    (v: RefImage[]) => setRefs({ referenceImages: v }),
+    [setRefs],
+  );
+  const setEndFrameImage = useCallback(
+    (v?: RefImage) => setRefs({ endFrameImage: v }),
+    [setRefs],
+  );
+  const setReferenceVideos = useCallback(
+    (v: RefVideo[]) => setRefs({ referenceVideos: v }),
+    [setRefs],
+  );
+  const setReferenceAudios = useCallback(
+    (v: RefAudio[]) => setRefs({ referenceAudios: v }),
+    [setRefs],
+  );
   const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
   const [isEndFramePickerOpen, setIsEndFramePickerOpen] = useState(false);
   const [isCharactersModalOpen, setIsCharactersModalOpen] = useState(false);
@@ -469,10 +485,12 @@ export default function CreateVideo() {
     if (!payload) return;
 
     flushSync(() => {
-      setReferenceImages(payload.referenceImages);
-      setEndFrameImage(payload.endFrameImage);
-      setReferenceVideos(payload.referenceVideos ?? []);
-      setReferenceAudios(payload.referenceAudios ?? []);
+      setRefs({
+        referenceImages: payload.referenceImages,
+        endFrameImage: payload.endFrameImage,
+        referenceVideos: payload.referenceVideos ?? [],
+        referenceAudios: payload.referenceAudios ?? [],
+      });
       setUi({
         ...(payload.modelId ? { selectedModelId: payload.modelId } : {}),
         ...(payload.inputMode ? { inputMode: payload.inputMode } : {}),
@@ -913,12 +931,14 @@ export default function CreateVideo() {
                 />
               </Tooltip>
             }
-            onClearAllRefs={() => {
-              setReferenceImages([]);
-              setEndFrameImage(undefined);
-              setReferenceVideos([]);
-              setReferenceAudios([]);
-            }}
+            onClearAllRefs={() =>
+              setRefs({
+                referenceImages: [],
+                endFrameImage: undefined,
+                referenceVideos: [],
+                referenceAudios: [],
+              })
+            }
             mentionItems={mentionItems.length > 0 ? mentionItems : undefined}
             mediaReferenceRow={
               isReferenceMode ? (

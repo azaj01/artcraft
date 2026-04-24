@@ -109,7 +109,8 @@ export default function CreateImage() {
   );
 
   const [isGenerating, setIsGenerating] = useState(false);
-  const [referenceImages, setReferenceImages] = useState<RefImage[]>([]);
+  const referenceImages = useCreateImageStore((s) => s.referenceImages);
+  const setReferenceImages = useCreateImageStore((s) => s.setReferenceImages);
   const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
   const [pickerSelectedIds, setPickerSelectedIds] = useState<string[]>([]);
   const imagePickerMax = Math.max(
