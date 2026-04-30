@@ -21,6 +21,7 @@ export type VideoBatch = {
   modelLabel: string;
   jobToken?: string;
   failureReason?: string;
+  batchCount?: number;
 };
 
 export type VideoInputMode = "keyframe" | "reference";
@@ -52,7 +53,7 @@ type CreateVideoState = {
   setRefs: (patch: Partial<VideoRefsState>) => void;
   setPendingRecreate: (payload: RecreatePayload | null) => void;
   consumePendingRecreate: () => RecreatePayload | null;
-  startBatch: (prompt: string, modelLabel: string) => string;
+  startBatch: (prompt: string, modelLabel: string, batchCount?: number) => string;
   setBatchJobToken: (batchId: string, jobToken: string) => void;
   completeBatch: (batchId: string, video: GeneratedVideo) => void;
   failBatch: (batchId: string, reason?: string) => void;
@@ -99,7 +100,7 @@ export const useCreateVideoStore = create<CreateVideoState>((set, get) => ({
     return payload;
   },
 
-  startBatch: (prompt, modelLabel) => {
+  startBatch: (prompt, modelLabel, batchCount) => {
     const id = crypto.randomUUID();
     const batch: VideoBatch = {
       id,
@@ -107,6 +108,7 @@ export const useCreateVideoStore = create<CreateVideoState>((set, get) => ({
       status: "pending",
       createdAt: Date.now(),
       modelLabel,
+      batchCount,
     };
     set((s) => ({ batches: [...s.batches, batch] }));
     return id;

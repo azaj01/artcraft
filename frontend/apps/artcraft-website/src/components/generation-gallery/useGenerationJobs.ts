@@ -19,6 +19,7 @@ export interface InProgressJob {
   progress: number;
   estimatedTimeLeftMs?: number;
   createdAt: string;
+  batchCount?: number;
 }
 
 export interface FailedJob {

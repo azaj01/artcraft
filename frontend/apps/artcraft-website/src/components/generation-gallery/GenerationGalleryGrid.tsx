@@ -144,6 +144,7 @@ export function GenerationGalleryGrid({
                 modelLabel={entry.job.modelLabel}
                 progress={entry.job.progress}
                 estimatedTimeLeftMs={entry.job.estimatedTimeLeftMs}
+                batchCount={entry.job.batchCount}
               />
             )}
             {entry.kind === "failed" && (
