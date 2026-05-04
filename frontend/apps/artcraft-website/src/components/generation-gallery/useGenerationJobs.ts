@@ -240,8 +240,9 @@ async function expandBatchItems(
 
 export function useGenerationJobs(options: {
   mediaType: "image" | "video";
+  enabled?: boolean;
 }) {
-  const { mediaType } = options;
+  const { mediaType, enabled = true } = options;
   const apiRef = useRef(new JobsApi());
   const mediaApiRef = useRef(new MediaFilesApi());
 
@@ -356,8 +357,12 @@ export function useGenerationJobs(options: {
     }
   }, [mediaType]);
 
-  // Poll every 5 seconds + listen for task-queue-update events
+  // Poll every 5 seconds + listen for task-queue-update events.
+  // Skip entirely when disabled (e.g. user is logged out) — otherwise we'd
+  // hit an authenticated endpoint every 5s for nothing, which on mobile
+  // Safari shows up as periodic main-thread jank during the menu animation.
   useEffect(() => {
+    if (!enabled) return;
     load();
     const intervalId = setInterval(load, 5000);
 
@@ -368,7 +373,7 @@ export function useGenerationJobs(options: {
       clearInterval(intervalId);
       window.removeEventListener("task-queue-update", handleTaskUpdate);
     };
-  }, [load]);
+  }, [load, enabled]);
 
   const dismissFailed = useCallback(
     async (jobToken: string) => {

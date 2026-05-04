@@ -304,7 +304,7 @@ export default function CreateVideo() {
     !!selectedModel?.starting_keyframe_required && referenceImages.length === 0;
 
   // Jobs + gallery
-  const jobs = useGenerationJobs({ mediaType: "video" });
+  const jobs = useGenerationJobs({ mediaType: "video", enabled: !!user });
   const gallery = useGalleryData({
     username: user?.username ?? null,
     filterMediaClasses: VIDEO_FILTER,
