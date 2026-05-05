@@ -14,8 +14,8 @@ import { useEffect, useState, Fragment } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@storyteller/ui-button";
 import { PopoverMenu } from "@storyteller/ui-popover";
-import { UsersApi, UserInfo, CreditsApi, BillingApi } from "@storyteller/api";
-import { getSession, invalidateSession } from "../../lib/session";
+import { UsersApi, CreditsApi, BillingApi } from "@storyteller/api";
+import { useSession, invalidateSession } from "../../lib/session";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCoins,
@@ -100,52 +100,30 @@ async function fetchHasPaidPlan(): Promise<boolean> {
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [user, setUser] = useState<UserInfo | undefined>(undefined);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, authChecked } = useSession();
+  const isLoading = !authChecked;
   const [credits, setCredits] = useState<number | null>(null);
   const [hasPaidPlan, setHasPaidPlan] = useState<boolean | null>(null);
   const [creditsModalOpen, setCreditsModalOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
-    const checkSession = async (force = false) => {
-      const response = await getSession(force);
-      if (
-        response.success &&
-        response.data &&
-        response.data.loggedIn &&
-        response.data.user
-      ) {
-        setUser(response.data.user);
-        fetchCredits().then(setCredits);
-        fetchHasPaidPlan().then(setHasPaidPlan);
-      } else {
-        setUser(undefined);
-        setCredits(null);
-        setHasPaidPlan(null);
-      }
-      setIsLoading(false);
-    };
+    if (user) {
+      fetchCredits().then(setCredits);
+      fetchHasPaidPlan().then(setHasPaidPlan);
+    } else {
+      setCredits(null);
+      setHasPaidPlan(null);
+    }
+  }, [user]);
 
-    checkSession();
-
-    const handleAuthChange = () => {
-      setIsLoading(true);
-      invalidateSession();
-      checkSession(true);
-    };
-
+  useEffect(() => {
     const handleCreditsChange = () => {
       fetchCredits().then(setCredits);
     };
-
-    window.addEventListener("auth-change", handleAuthChange);
     window.addEventListener("credits-change", handleCreditsChange);
-    return () => {
-      window.removeEventListener("auth-change", handleAuthChange);
-      window.removeEventListener("credits-change", handleCreditsChange);
-    };
-  }, [location.pathname]);
+    return () => window.removeEventListener("credits-change", handleCreditsChange);
+  }, []);
 
   const handleLogout = async () => {
     const api = new UsersApi();
