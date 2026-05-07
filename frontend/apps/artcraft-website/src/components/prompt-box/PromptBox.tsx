@@ -363,7 +363,7 @@ export const PromptBox = forwardRef<HTMLDivElement, PromptBoxProps>(
     }, [prompt, hasMentionItems, mentionRegex, mentionLabelMap, mentionItems]);
 
     return (
-      <div ref={ref} className="prompt-box-root font-display">
+      <div ref={ref} className="prompt-box-root">
         <div className="relative flex flex-col">
           {isImageRowVisible && (
             <ImagePromptRow
