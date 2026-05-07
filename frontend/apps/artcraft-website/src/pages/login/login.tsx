@@ -71,7 +71,7 @@ const Login = () => {
       <main className="relative z-10 flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-md bg-[#1C1C20] border border-white/10 rounded-2xl p-6 py-8 shadow-2xl">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold mb-2">Welcome Back</h1>
+            <h1 className="text-2xl font-semibold mb-2">Welcome Back</h1>
             <p className="text-white/60 text-sm">Log in to your account</p>
           </div>
 

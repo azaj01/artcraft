@@ -94,7 +94,7 @@ export function CreateMediaPageShell({
             icon={heroIcon}
             className="mb-6 text-5xl text-white/20"
           />
-          <h1 className="mb-3 text-4xl font-bold">{heroTitle}</h1>
+          <h1 className="mb-3 text-4xl font-semibold">{heroTitle}</h1>
           <p className="mb-8 max-w-md text-center text-lg text-white/60">
             {heroSubtitle}
           </p>
@@ -161,7 +161,7 @@ export function CreateMediaPageShell({
           {!hasContent && (
             <div className="flex flex-1 items-center justify-center">
               <div className="animate-fade-in-up relative z-20 mb-32 flex flex-col items-center justify-center text-center drop-shadow-xl">
-                <h1 className="text-5xl font-bold text-white md:text-7xl">
+                <h1 className="text-5xl font-semibold text-white md:text-7xl">
                   {emptyStateTitle}
                 </h1>
                 <span className="pt-2 text-lg text-white/80 md:text-xl">

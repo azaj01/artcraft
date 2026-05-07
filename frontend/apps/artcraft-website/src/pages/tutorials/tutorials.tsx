@@ -55,7 +55,7 @@ export const TutorialsPage = () => {
       <div className="relative z-10 mx-auto w-full max-w-[1200px] px-4 sm:px-8 pt-28 sm:pt-36 pb-12 min-h-screen">
         {/* Hero */}
         <div className="text-center mb-8 sm:mb-12">
-          <h1 className="text-4xl sm:text-6xl font-bold mb-3">Tutorials</h1>
+          <h1 className="text-4xl sm:text-6xl font-medium mb-3">Tutorials</h1>
           <p className="text-white/70 text-base sm:text-lg">
             Learn tips, tricks, and workflows for ArtCraft.
           </p>

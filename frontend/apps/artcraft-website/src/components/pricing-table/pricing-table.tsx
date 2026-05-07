@@ -309,7 +309,7 @@ const PricingTable = ({
       {showHeader && (
         <div className={`text-center mx-auto ${compact ? "mb-6" : "mb-10"}`}>
           <h2
-            className={`font-bold mb-4 ${compact ? "text-2xl md:text-3xl" : "text-4xl sm:text-4xl md:text-6xl"}`}
+            className={`font-medium mb-4 ${compact ? "text-2xl md:text-3xl" : "text-4xl sm:text-4xl md:text-6xl"}`}
           >
             {title}
           </h2>
@@ -375,7 +375,7 @@ const PricingTable = ({
                 </div>
               )}
 
-              <h3 className="text-xl md:text-2xl font-bold mb-2 text-white">
+              <h3 className="text-xl md:text-2xl font-medium mb-2 text-white">
                 {plan.name}
               </h3>
               <div className="mb-1 flex items-baseline gap-2">
@@ -458,7 +458,7 @@ const PricingTable = ({
                 : "relative rounded-3xl p-6 md:p-8 border flex flex-col transition-all duration-300 backdrop-blur-md bg-gradient-to-b from-[#0d1f4a]/90 via-[#183878]/60 to-[#2456b8]/15 border-[#3568c9]/40 hover:border-[#3568c9] hover:shadow-[0_0_30px_rgba(53,104,201,0.25)]"
             }
           >
-            <h3 className="text-xl md:text-2xl font-bold mb-2 text-white">
+            <h3 className="text-xl md:text-2xl font-medium mb-2 text-white">
               Enterprise
             </h3>
             <div className="mb-1 flex items-baseline gap-2">
@@ -497,7 +497,7 @@ const PricingTable = ({
           }
         >
           <div className="flex-shrink-0">
-            <h3 className="text-lg font-bold text-white">Enterprise</h3>
+            <h3 className="text-lg font-medium text-white">Enterprise</h3>
             <div className="text-2xl font-bold mt-1">Custom</div>
             <div className="text-xs text-white/50 mt-1">
               For bespoke solutions

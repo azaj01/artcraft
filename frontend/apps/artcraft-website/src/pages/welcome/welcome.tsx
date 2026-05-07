@@ -43,7 +43,7 @@ const Welcome = () => {
             </span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 tracking-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-medium mb-4 tracking-tight">
             Welcome to <span className="text-primary">ArtCraft</span>
           </h1>
           <p className="text-xl text-white/70 max-w-2xl mx-auto">
@@ -71,7 +71,7 @@ const Welcome = () => {
                   className="text-primary text-lg"
                 />
               </div>
-              <h2 className="text-2xl font-bold text-white">Getting Started</h2>
+              <h2 className="text-2xl font-medium text-white">Getting Started</h2>
             </div>
 
             <p className="text-white/60 mb-6">

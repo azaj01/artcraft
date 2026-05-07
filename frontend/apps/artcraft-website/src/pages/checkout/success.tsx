@@ -101,7 +101,7 @@ const CheckoutSuccess = () => {
             </div>
 
             {/* Header */}
-            <h1 className="text-3xl md:text-4xl font-bold mb-4 text-white">
+            <h1 className="text-3xl md:text-4xl font-medium mb-4 text-white">
               Thank You for Your Support!
             </h1>
             <p className="text-lg text-white/70 mb-8 max-w-md mx-auto">
@@ -119,7 +119,7 @@ const CheckoutSuccess = () => {
                     className="text-primary text-sm"
                   />
                 </div>
-                <h2 className="text-lg font-bold text-white">Next Steps</h2>
+                <h2 className="text-lg font-medium text-white">Next Steps</h2>
               </div>
 
               <div className="space-y-3">

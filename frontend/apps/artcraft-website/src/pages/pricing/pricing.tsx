@@ -24,7 +24,7 @@ const SeedanceBanner = () => (
     </div>
 
     <div>
-      <h1 className="text-3xl md:text-4xl lg:text-5xl tracking-[-0.035em] font-semibold leading-[1.05] mb-3">
+      <h1 className="text-3xl md:text-4xl lg:text-5xl tracking-[-0.035em] font-medium leading-[1.05] mb-3">
         Seedance 2.0 is{" "}
         <span className="font-serif-italic">here</span>
       </h1>
@@ -181,7 +181,7 @@ const Pricing = () => {
               <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-5">
                 Plans
               </span>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl tracking-[-0.035em] font-semibold leading-[1.02] mb-5">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl tracking-[-0.035em] font-medium leading-[1.02] mb-5">
                 Invest in <span className="font-serif-italic">yourself</span>.
               </h1>
               <p className="max-w-xl mx-auto text-base sm:text-lg text-white/55 leading-relaxed">

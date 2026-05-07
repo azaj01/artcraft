@@ -103,7 +103,7 @@ const Download = () => {
       <div className="relative w-full max-w-6xl mx-auto px-6 sm:px-10 pt-36 sm:pt-40 pb-24">
         {/* Hero */}
         <div className="text-center mb-16 sm:mb-20">
-          <h1 className="font-bold text-4xl sm:text-5xl lg:text-7xl mb-6 drop-shadow-[0_4px_32px_rgba(80,80,255,0.25)]">
+          <h1 className="font-medium text-4xl sm:text-5xl lg:text-7xl mb-6 drop-shadow-[0_4px_32px_rgba(80,80,255,0.25)]">
             Download ArtCraft
           </h1>
           <p className="max-w-xl mx-auto text-lg lg:text-xl leading-relaxed text-white/70">
@@ -148,7 +148,7 @@ const Download = () => {
 
         {/* Platform cards */}
         <div className="mb-20 sm:mb-24">
-          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-10">
+          <h2 className="text-2xl sm:text-3xl font-medium text-center mb-10">
             Available Platforms
           </h2>
 
@@ -178,7 +178,7 @@ const Download = () => {
                       icon={system.icon}
                       className="text-2xl text-white/80"
                     />
-                    <h3 className="text-xl font-bold">{system.os}</h3>
+                    <h3 className="text-xl font-medium">{system.os}</h3>
                   </div>
 
                   <ul className="space-y-3 mb-8 flex-1">
@@ -222,7 +222,7 @@ const Download = () => {
 
         {/* Quick-start steps */}
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-10">
+          <h2 className="text-2xl sm:text-3xl font-medium text-center mb-10">
             Get Started in Minutes
           </h2>
 
@@ -251,7 +251,7 @@ const Download = () => {
                 <div className="w-10 h-10 rounded-full bg-primary/20 text-primary font-bold text-sm flex items-center justify-center mx-auto mb-4">
                   {item.step}
                 </div>
-                <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
+                <h3 className="font-medium text-lg mb-2">{item.title}</h3>
                 <p className="text-white/50 text-sm">{item.desc}</p>
               </div>
             ))}

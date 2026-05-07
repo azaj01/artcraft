@@ -270,7 +270,7 @@ export default function Library() {
     return (
       <div className="relative min-h-screen w-full bg-[#101014] flex items-center justify-center px-4">
         <div className="text-center space-y-6">
-          <h1 className="text-3xl font-bold text-white">My Library</h1>
+          <h1 className="text-3xl font-medium text-white">My Library</h1>
           <p className="text-white/60 text-lg max-w-md mx-auto">
             Sign in to view your generated images and videos.
           </p>
@@ -313,7 +313,7 @@ export default function Library() {
         <div className="sticky top-12 sm:top-16 z-10 -mx-3 sm:-mx-4 md:-mx-8 lg:-mx-12 px-3 sm:px-4 md:px-8 lg:px-12 pb-3 pt-3 bg-[#101014]">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 shrink-0">
-              <h1 className="text-lg sm:text-2xl font-bold text-white">
+              <h1 className="text-lg sm:text-2xl font-medium text-white">
                 My Library
               </h1>
               <button

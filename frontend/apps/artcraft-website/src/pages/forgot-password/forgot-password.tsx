@@ -67,7 +67,7 @@ const ForgotPassword = () => {
           {!submitted ? (
             <>
               <div className="text-center mb-8">
-                <h1 className="text-2xl font-bold mb-2">Reset Password</h1>
+                <h1 className="text-2xl font-semibold mb-2">Reset Password</h1>
                 <p className="text-white/60 text-sm">
                   Enter your email to receive reset instructions
                 </p>
@@ -124,7 +124,7 @@ const ForgotPassword = () => {
               <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4 text-green-500">
                 <FontAwesomeIcon icon={faEnvelope} className="text-2xl" />
               </div>
-              <h3 className="text-xl font-bold mb-2">Check your email</h3>
+              <h3 className="text-xl font-medium mb-2">Check your email</h3>
               <p className="text-white/60 text-sm mb-6">
                 We've sent a password reset code to <br />
                 <span className="text-white font-medium">{email}</span>

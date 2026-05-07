@@ -521,7 +521,7 @@ const Landing3 = () => {
 
           {/* Headline */}
           <h1
-            className="text-[44px] leading-[1.02] sm:text-6xl md:text-7xl lg:text-[88px] tracking-[-0.045em] font-semibold mb-6 text-white"
+            className="text-[44px] leading-[1.02] sm:text-6xl md:text-7xl lg:text-[88px] tracking-[-0.045em] font-medium mb-6 text-white"
             data-reveal
           >
             Controllable AI
@@ -653,7 +653,7 @@ const Landing3 = () => {
         <section className="relative px-4 py-20 bg-[#101014]">
           <div className="max-w-2xl mx-auto text-center">
             <h2
-              className="text-2xl sm:text-3xl tracking-[-0.035em] font-semibold text-white px-4 sm:px-0"
+              className="text-2xl sm:text-3xl tracking-[-0.035em] font-medium text-white px-4 sm:px-0"
               style={{ lineHeight: 1.4 }}
             >
               {MANIFESTO_WORDS.join(" ")}
@@ -694,7 +694,7 @@ const Landing3 = () => {
               pausedRef={characterPausedRef}
             />
             <h2
-              className="relative z-10 max-w-4xl mx-auto px-4 sm:px-8 text-center text-2xl sm:text-4xl md:text-5xl lg:text-[60px] tracking-[-0.035em] font-semibold text-white"
+              className="relative z-10 max-w-4xl mx-auto px-4 sm:px-8 text-center text-2xl sm:text-4xl md:text-5xl lg:text-[60px] tracking-[-0.035em] font-medium text-white"
               style={{
                 lineHeight: 1.2,
                 textShadow:
@@ -725,7 +725,7 @@ const Landing3 = () => {
           <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-5">
             Crafting features
           </span>
-          <h2 className="text-4xl sm:text-5xl md:text-6xl tracking-[-0.035em] font-semibold leading-[1.02] mb-5">
+          <h2 className="text-4xl sm:text-5xl md:text-6xl tracking-[-0.035em] font-medium leading-[1.02] mb-5">
             We're pulling you{" "}
             <span className="font-serif-italic">out of prompting.</span>
           </h2>
@@ -778,7 +778,7 @@ const Landing3 = () => {
                     {feature.label}
                   </span>
                 </div>
-                <h3 className="text-2xl sm:text-3xl md:text-[32px] tracking-[-0.02em] font-semibold leading-[1.15] mb-4 text-white">
+                <h3 className="text-2xl sm:text-3xl md:text-[32px] tracking-[-0.02em] font-medium leading-[1.15] mb-4 text-white">
                   {feature.title}
                 </h3>
                 <p className="text-[15px] sm:text-base text-white/55 leading-relaxed">
@@ -812,7 +812,7 @@ const Landing3 = () => {
             <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-5">
               Ownership
             </span>
-            <h2 className="text-4xl sm:text-5xl md:text-6xl tracking-[-0.035em] font-semibold leading-[1.02] mb-5">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl tracking-[-0.035em] font-medium leading-[1.02] mb-5">
               Stop renting from{" "}
               <span className="font-serif-italic">websites</span>.
             </h2>
@@ -831,7 +831,7 @@ const Landing3 = () => {
                   Other tools
                 </span>
               </div>
-              <h3 className="text-xl sm:text-2xl font-semibold mb-5 tracking-[-0.01em] text-white/85">
+              <h3 className="text-xl sm:text-2xl font-medium mb-5 tracking-[-0.01em] text-white/85">
                 The Rental Trap
               </h3>
               <p className="text-[15px] text-white/55 leading-relaxed mb-6">
@@ -873,7 +873,7 @@ const Landing3 = () => {
                     className="h-5 w-auto"
                   />
                 </div>
-                <h3 className="text-xl sm:text-2xl font-bold mb-5 tracking-[-0.01em] text-white">
+                <h3 className="text-xl sm:text-2xl font-medium mb-5 tracking-[-0.01em] text-white">
                   Complete ownership
                 </h3>
                 <p className="text-[15px] text-white/80 leading-relaxed mb-6">
@@ -926,7 +926,7 @@ const Landing3 = () => {
             <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-5">
               Why ArtCraft
             </span>
-            <h2 className="text-4xl sm:text-5xl md:text-6xl tracking-[-0.035em] font-semibold leading-[1.02]">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl tracking-[-0.035em] font-medium leading-[1.02]">
               Five reasons it's the{" "}
               <span className="font-serif-italic">best tool</span>.
             </h2>
@@ -947,7 +947,7 @@ const Landing3 = () => {
                 </div>
                 <div className="flex flex-col justify-between">
                   <div>
-                    <h3 className="font-semibold tracking-[-0.02em] text-xl sm:text-2xl lg:text-3xl mb-3 sm:mb-4 leading-tight text-white">
+                    <h3 className="font-medium tracking-[-0.02em] text-xl sm:text-2xl lg:text-3xl mb-3 sm:mb-4 leading-tight text-white">
                       Text Prompting Sucks
                     </h3>
                     <p className="text-white/60 text-sm sm:text-base lg:text-lg leading-relaxed">
@@ -965,7 +965,7 @@ const Landing3 = () => {
             {/* Reason #2: Desktop App */}
             <div className="xl:col-span-6 rounded-3xl bg-[#080808] p-6 lg:p-8 pb-0 lg:pb-0 group overflow-hidden">
               <div className="relative flex flex-col h-full">
-                <h3 className="font-semibold tracking-[-0.02em] text-xl sm:text-2xl lg:text-3xl mb-3 sm:mb-4 leading-tight text-white">
+                <h3 className="font-medium tracking-[-0.02em] text-xl sm:text-2xl lg:text-3xl mb-3 sm:mb-4 leading-tight text-white">
                   Desktop App
                 </h3>
                 <p className="text-white/60 text-sm sm:text-base mb-4 sm:mb-6 lg:text-lg leading-relaxed">
@@ -1010,7 +1010,7 @@ const Landing3 = () => {
             {/* Reason #3: Open Source */}
             <div className="xl:col-span-4 rounded-3xl bg-[#080808] p-6 lg:p-8 group">
               <div className="flex flex-col h-full">
-                <h3 className="font-semibold tracking-[-0.02em] text-xl sm:text-2xl lg:text-3xl mb-3 sm:mb-4 leading-tight text-white">
+                <h3 className="font-medium tracking-[-0.02em] text-xl sm:text-2xl lg:text-3xl mb-3 sm:mb-4 leading-tight text-white">
                   It's Open Source
                 </h3>
                 <p className="text-white/60 text-sm sm:text-base lg:text-lg mb-4 sm:mb-6 leading-relaxed flex-1">
@@ -1038,7 +1038,7 @@ const Landing3 = () => {
             <div className="xl:col-span-8 rounded-3xl bg-[#080808] group overflow-hidden">
               <div className="lg:flex-1 flex flex-col justify-between">
                 <div className="p-6 lg:p-8">
-                  <h3 className="font-semibold tracking-[-0.02em] text-xl sm:text-2xl lg:text-3xl mb-3 sm:mb-4 leading-tight text-white">
+                  <h3 className="font-medium tracking-[-0.02em] text-xl sm:text-2xl lg:text-3xl mb-3 sm:mb-4 leading-tight text-white">
                     Use Every Model
                   </h3>
                   <p className="text-white/60 text-sm sm:text-base lg:text-lg leading-relaxed">
@@ -1061,7 +1061,7 @@ const Landing3 = () => {
             <div className="xl:col-span-12 md:col-span-2 rounded-3xl bg-[#080808] p-6 lg:p-8 group">
               <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 items-center">
                 <div className="lg:flex-1">
-                  <h3 className="font-semibold tracking-[-0.02em] text-xl sm:text-2xl lg:text-3xl mb-3 sm:mb-4 leading-tight text-white">
+                  <h3 className="font-medium tracking-[-0.02em] text-xl sm:text-2xl lg:text-3xl mb-3 sm:mb-4 leading-tight text-white">
                     Created by Artists and Filmmakers
                   </h3>
                   <p className="text-white/60 text-sm sm:text-base lg:text-lg leading-relaxed">
@@ -1112,7 +1112,7 @@ const Landing3 = () => {
             <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-5">
               Community
             </span>
-            <h2 className="text-4xl sm:text-5xl md:text-6xl tracking-[-0.035em] font-semibold leading-[1.02] mb-5">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl tracking-[-0.035em] font-medium leading-[1.02] mb-5">
               Made using <span className="font-serif-italic">ArtCraft</span>.
             </h2>
             <p className="text-base sm:text-lg text-white/55">
@@ -1193,7 +1193,7 @@ const Landing3 = () => {
               }}
             />
             <div className="relative">
-              <h2 className="text-4xl sm:text-5xl md:text-6xl tracking-[-0.035em] font-semibold leading-[1.02] mb-5 text-white">
+              <h2 className="text-4xl sm:text-5xl md:text-6xl tracking-[-0.035em] font-medium leading-[1.02] mb-5 text-white">
                 Ready to <span className="font-serif-italic">craft</span>?
               </h2>
               <p className="max-w-xl mx-auto text-base sm:text-lg text-white/60 leading-relaxed mb-10">

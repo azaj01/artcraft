@@ -43,7 +43,7 @@ const FaqIndex = () => {
 
       <div className="relative z-10 mx-auto w-full max-w-4xl px-4 sm:px-8 pt-28 sm:pt-36 pb-12">
         <div className="text-center mb-10">
-          <h1 className="text-4xl sm:text-6xl font-bold mb-3">
+          <h1 className="text-4xl sm:text-6xl font-medium mb-3">
             Frequently Asked Questions
           </h1>
           <p className="text-white/70 text-base sm:text-lg">
@@ -58,7 +58,7 @@ const FaqIndex = () => {
               to={`/faq/${item.slug}`}
               className="group block rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 p-5 transition-all"
             >
-              <h2 className="text-xl font-semibold mb-2 group-hover:text-blue-400 transition-colors flex items-center gap-2">
+              <h2 className="text-xl font-medium mb-2 group-hover:text-blue-400 transition-colors flex items-center gap-2">
                 {item.title}
                 <FontAwesomeIcon icon={faArrowRight} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
               </h2>

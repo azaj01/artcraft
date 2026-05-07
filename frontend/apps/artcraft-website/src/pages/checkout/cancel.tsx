@@ -90,7 +90,7 @@ const CheckoutCancel = () => {
             </div>
 
             {/* Header */}
-            <h1 className="text-3xl md:text-4xl font-bold mb-4 text-white">
+            <h1 className="text-3xl md:text-4xl font-medium mb-4 text-white">
               Checkout Cancelled
             </h1>
             <p className="text-lg text-white/60 mb-8 max-w-md mx-auto">

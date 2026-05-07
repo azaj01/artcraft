@@ -123,7 +123,7 @@ const VerifyReset = () => {
           {!success ? (
             <>
               <div className="text-center mb-8">
-                <h1 className="text-2xl font-bold mb-2">
+                <h1 className="text-2xl font-semibold mb-2">
                   Password Reset Verification
                 </h1>
                 <p className="text-white/60 text-sm">
@@ -265,7 +265,7 @@ const VerifyReset = () => {
                 <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4 text-green-500">
                   <FontAwesomeIcon icon={faCheckCircle} className="text-2xl" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">
+                <h3 className="text-xl font-medium mb-2">
                   Password Reset Successfully
                 </h3>
                 <p className="text-white/60 text-sm mb-8">

@@ -20,7 +20,7 @@ const TutorialsArticle = () => {
     return (
       <div className="relative min-h-screen bg-[#101014] text-white overflow-x-hidden bg-dots">
         <div className="relative z-10 mx-auto w-full max-w-[1200px] px-4 sm:px-8 pt-28 sm:pt-36 pb-12">
-          <h1 className="text-3xl font-bold">Not found</h1>
+          <h1 className="text-3xl font-medium">Not found</h1>
           <p className="text-white/70">We couldn't find this tutorial.</p>
         </div>
       </div>
@@ -76,7 +76,7 @@ const TutorialsArticle = () => {
           </Link>
         </div>
 
-        <h1 className="text-4xl sm:text-5xl font-bold mb-4 !leading-tight">
+        <h1 className="text-4xl sm:text-5xl font-medium mb-4 !leading-tight">
           {item.title || slug}
         </h1>
         {description && <p className="text-white/70 mb-8">{description}</p>}

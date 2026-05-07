@@ -55,7 +55,7 @@ const Support = () => {
 
       <main className="relative z-10 mx-auto w-full max-w-4xl px-4 sm:px-6 pt-24 sm:pt-32 pb-20">
         <header className="mb-8 sm:mb-10 flex flex-col items-center text-center gap-3">
-          <h1 className="text-3xl sm:text-5xl font-bold tracking-[-0.02em]">
+          <h1 className="text-3xl sm:text-5xl font-semibold tracking-[-0.02em]">
             Support
           </h1>
           <p className="text-[15px] sm:text-base text-white/60 max-w-xl">
@@ -85,8 +85,9 @@ const SupportLink = ({ row }: { row: SupportRow }) => {
   const content = (
     <>
       <div
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md border transition-colors ${row.iconBgClass ?? "bg-white/[0.04] border-white/[0.06]"
-          } ${row.iconColorClass ?? "text-white/70 group-hover:text-white"}`}
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md border transition-colors ${
+          row.iconBgClass ?? "bg-white/[0.04] border-white/[0.06]"
+        } ${row.iconColorClass ?? "text-white/70 group-hover:text-white"}`}
       >
         <FontAwesomeIcon icon={row.icon} />
       </div>

@@ -19,7 +19,7 @@ module.exports = {
     extend: {
       fontFamily: {
         display: [
-          "Figtree",
+          "Outfit",
           "system-ui",
           "-apple-system",
           "BlinkMacSystemFont",

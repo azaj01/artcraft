@@ -99,7 +99,7 @@ const AssetCard = ({
 
       {/* Content */}
       <div className="flex flex-col flex-1 p-5">
-        <h3 className="text-lg font-semibold text-white mb-1 line-clamp-2">
+        <h3 className="text-lg font-medium text-white mb-1 line-clamp-2">
           {asset.title}
         </h3>
         {asset.description && (
@@ -233,7 +233,7 @@ export default function PressKitPage() {
         <div className="relative z-10 max-w-7xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12 sm:mb-16">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-medium mb-6 leading-tight">
               Press Kit
             </h1>
             <p className="text-lg sm:text-xl text-white/70 max-w-2xl mx-auto leading-relaxed">
@@ -249,7 +249,7 @@ export default function PressKitPage() {
               {categoriesWithAssets.map((category) => (
                 <section key={category.name}>
                   <div className="mb-6">
-                    <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+                    <h2 className="text-2xl sm:text-3xl font-medium text-white mb-2">
                       {category.name}
                     </h2>
                     {category.description && (
@@ -277,7 +277,7 @@ export default function PressKitPage() {
                   className="text-3xl text-white/30"
                 />
               </div>
-              <h2 className="text-2xl font-bold text-white mb-3">
+              <h2 className="text-2xl font-medium text-white mb-3">
                 Press Kit Coming Soon
               </h2>
               <p className="text-white/60 max-w-md mx-auto">
@@ -289,7 +289,7 @@ export default function PressKitPage() {
 
           {/* Contact Section */}
           <div className="mt-20 text-center py-12 px-6 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm">
-            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+            <h2 className="text-2xl sm:text-3xl font-medium text-white mb-4">
               Need Something Specific?
             </h2>
             <p className="text-white/70 mb-6 max-w-lg mx-auto">
