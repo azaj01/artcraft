@@ -39,6 +39,7 @@ interface PromptBoxVFXProps {
   uploadImage: VFXUploadFn;
   onError: (message: string) => void;
   containerClassName?: string;
+  hideResolution?: boolean;
 }
 
 type SlotKind = "source" | "mask" | "reference";
@@ -50,6 +51,7 @@ export const PromptBoxVFX = ({
   uploadImage,
   onError,
   containerClassName,
+  hideResolution = false,
 }: PromptBoxVFXProps) => {
   const source = useVFXStore((s) => s.source);
   const reference = useVFXStore((s) => s.reference);
@@ -356,15 +358,17 @@ export const PromptBoxVFX = ({
               triggerLabel={selectedModel.label}
             />
           </Tooltip>
-          <Tooltip content="Resolution" position="top" closeOnClick>
-            <PopoverMenu
-              items={resolutionItems}
-              onSelect={handleResolutionSelect}
-              mode="toggle"
-              panelTitle="Resolution"
-              triggerLabel={resolution}
-            />
-          </Tooltip>
+          {!hideResolution && (
+            <Tooltip content="Resolution" position="top" closeOnClick>
+              <PopoverMenu
+                items={resolutionItems}
+                onSelect={handleResolutionSelect}
+                mode="toggle"
+                panelTitle="Resolution"
+                triggerLabel={resolution}
+              />
+            </Tooltip>
+          )}
 
           <Tooltip
             content={hasPrompt ? "Edit prompt" : "Add an optional prompt"}

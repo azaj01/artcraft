@@ -376,6 +376,7 @@ export default function CreateVFX() {
             uploadVideo={uploadVideo}
             uploadImage={uploadImage}
             onError={(msg) => toast.error(msg)}
+            hideResolution
           />
         </div>
       </div>

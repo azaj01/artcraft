@@ -80,6 +80,8 @@ export const MODEL_TYPE_TO_CREATOR: Record<string, ModelCreator> = {
   qwen_edit_2511_angles: ModelCreator.Alibaba,
   // Happy Horse (Alibaba wanvideo)
   happy_horse_1p0: ModelCreator.Alibaba,
+  // Beeble (Background Change / VFX)
+  switch_x: ModelCreator.Beeble,
 };
 
 // Get creator icon for a model type
@@ -247,10 +249,7 @@ export const getModelDisplayName = (modelType: string): string => {
     qwen_edit_2511_angles: "Qwen Edit 2511 Angles",
 
     // Beeble (Background Change / VFX)
-    beeble_switchx: "Beeble SwitchX",
-    // Backend may emit either form — keep both keyed.
     switch_x: "Beeble SwitchX",
-    switchx: "Beeble SwitchX",
   };
 
   const key = normalizeModelKey(modelType);
