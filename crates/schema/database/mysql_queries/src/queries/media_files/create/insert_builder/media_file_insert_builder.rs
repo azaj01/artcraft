@@ -9,6 +9,7 @@ use enums::by_table::media_files::media_file_origin_product_category::MediaFileO
 use enums::by_table::media_files::media_file_type::MediaFileType;
 use enums::common::visibility::Visibility;
 use sqlx::MySqlPool;
+use enums::common::generation_provider::GenerationProvider;
 use tokens::tokens::anonymous_visitor_tracking::AnonymousVisitorTrackingToken;
 use tokens::tokens::batch_generations::BatchGenerationToken;
 use tokens::tokens::media_files::MediaFileToken;
@@ -79,7 +80,8 @@ pub struct MediaFileInsertBuilder {
   // Storage details
   public_bucket_directory_hash: Option<MediaFileBucketPath>, // NB: Non-nullable field(s)
 
-  // Remaining fields...
+  // Generation details
+  maybe_generation_provider: Option<GenerationProvider>,
 }
 
 impl MediaFileInsertBuilder {
@@ -113,6 +115,7 @@ impl MediaFileInsertBuilder {
       maybe_cover_image_media_file_token: None,
       public_bucket_directory_hash: None,
       maybe_prompt_token: None,
+      maybe_generation_provider: None,
     }
   }
 
@@ -264,15 +267,16 @@ impl MediaFileInsertBuilder {
     self
   }
 
+  pub fn maybe_generation_provider(mut self, maybe_generation_provider: Option<GenerationProvider>) -> Self {
+    self.maybe_generation_provider = maybe_generation_provider;
+    self
+  }
+
   // TODO(bt,2025-04-26): Other connector options.
   pub async fn insert_pool(self, mysql_pool: &MySqlPool) -> Result<MediaFileToken, MediaFileInsertBuilderError> {
     let media_file_type = self.media_file_type
         .ok_or_else(|| MediaFileInsertBuilderError::MissingRequiredField(
           "Media file type is required".to_string()))?;
-
-    let origin_category = self.origin_category
-        .ok_or_else(|| MediaFileInsertBuilderError::MissingRequiredField(
-          "Origin category is required".to_string()))?;
 
     let checksum_sha2 = self.checksum_sha2
         .ok_or_else(|| MediaFileInsertBuilderError::MissingRequiredField(
@@ -281,6 +285,25 @@ impl MediaFileInsertBuilder {
     let bucket_path = self.public_bucket_directory_hash
         .ok_or_else(|| MediaFileInsertBuilderError::MissingRequiredField(
           "Public bucket directory hash is required".to_string()))?;
+    
+    let mut origin_category = self.origin_category
+        .ok_or_else(|| MediaFileInsertBuilderError::MissingRequiredField(
+          "Origin category is required".to_string()))?;
+
+    let mut maybe_generation_provider_str = None;
+    let mut is_intermediate_system_file = self.is_intermediate_system_file;
+    let mut is_user_upload = self.is_user_upload;
+
+    if let Some(generation_provider) = self.maybe_generation_provider {
+      // Overrides if we're using a generation provider
+      maybe_generation_provider_str = Some(generation_provider.to_str());
+      is_intermediate_system_file = false;
+      is_user_upload = false;
+      if generation_provider != GenerationProvider::Artcraft {
+        origin_category = MediaFileOriginCategory::ThirdPartyInference;
+      }
+    }
+    
 
     let result = insert_media_file_generic(InsertArgs {
       pool: mysql_pool,
@@ -290,8 +313,8 @@ impl MediaFileInsertBuilder {
       creator_set_visibility: self.creator_set_visibility,
       media_class: self.media_file_class,
       media_type: media_file_type,
-      is_user_upload: self.is_user_upload,
-      is_intermediate_system_file: self.is_intermediate_system_file,
+      is_user_upload,
+      is_intermediate_system_file,
       origin_category,
       origin_product_category: self.origin_product_category,
       maybe_origin_model_type: None, // TODO
@@ -317,6 +340,7 @@ impl MediaFileInsertBuilder {
       maybe_creator_file_synthetic_id_category: IdCategory::MediaFile, // TODO: Remove this
       maybe_creator_category_synthetic_id_category: IdCategory::FileUpload, // TODO: Remove this
       maybe_extra_media_info: None, // TODO
+      maybe_generation_provider: self.maybe_generation_provider,
       maybe_cover_image_media_file_token: self.maybe_cover_image_media_file_token.as_ref(),
       is_generated_on_prem: false, // TODO
       generated_by_worker: None, // TODO
