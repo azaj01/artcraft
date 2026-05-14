@@ -2,15 +2,15 @@ use std::sync::Arc;
 
 use actix_web::web::{Json, Query};
 use actix_web::{web, HttpRequest};
-use chrono::{DateTime, Utc};
 use log::warn;
-use utoipa::{IntoParams, ToSchema};
 
+use artcraft_api_defs::moderation::user_referrals::list_global_user_referrals::{
+  InvitedUserDetails, ListGlobalUserReferralsQueryParams,
+  ListGlobalUserReferralsSuccessResponse, ReferrerUserDetails, UserReferralResponse,
+};
 use mysql_queries::queries::user_referrals::list_global_user_referrals::{
   list_global_user_referrals, ListGlobalUserReferralsArgs,
 };
-use tokens::tokens::user_referral_codes::UserReferralCodeToken;
-use tokens::tokens::users::UserToken;
 
 use crate::http_server::common_responses::advanced_common_web_error::AdvancedCommonWebError;
 use crate::http_server::web_utils::user_session::require_moderator::{
@@ -21,50 +21,6 @@ use crate::state::server_state::ServerState;
 const CURSOR_NAME: &str = "modusrref";
 const DEFAULT_LIMIT: u32 = 100;
 const MAX_LIMIT: u32 = 1000;
-
-// --- Request ---
-
-#[derive(Deserialize, ToSchema, IntoParams)]
-pub struct ListGlobalUserReferralsQueryParams {
-  pub cursor: Option<String>,
-  pub limit: Option<u32>,
-}
-
-// --- Response ---
-
-#[derive(Serialize, ToSchema)]
-pub struct ListGlobalUserReferralsSuccessResponse {
-  pub success: bool,
-  pub referrals: Vec<UserReferralResponse>,
-  pub maybe_cursor: Option<String>,
-}
-
-#[derive(Serialize, ToSchema)]
-pub struct UserReferralResponse {
-  pub invited_user: InvitedUserDetails,
-  pub referrer_user: ReferrerUserDetails,
-  pub maybe_referral_code_token: Option<UserReferralCodeToken>,
-  pub maybe_referral_url: Option<String>,
-  pub maybe_landing_url: Option<String>,
-  pub created_at: DateTime<Utc>,
-}
-
-#[derive(Serialize, ToSchema)]
-pub struct InvitedUserDetails {
-  pub token: UserToken,
-  pub username: String,
-  pub display_name: String,
-  pub email_address: String,
-}
-
-#[derive(Serialize, ToSchema)]
-pub struct ReferrerUserDetails {
-  pub token: UserToken,
-  pub username: String,
-  pub display_name: String,
-}
-
-// --- Handler ---
 
 /// List all user referrals globally. Moderators only.
 #[utoipa::path(

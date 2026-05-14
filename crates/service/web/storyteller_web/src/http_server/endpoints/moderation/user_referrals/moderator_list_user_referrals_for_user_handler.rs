@@ -3,16 +3,19 @@ use std::sync::Arc;
 use actix_web::web::{Json, Path, Query};
 use actix_web::{web, HttpRequest};
 use log::warn;
-use utoipa::{IntoParams, ToSchema};
 
+use artcraft_api_defs::moderation::user_referrals::list_global_user_referrals::{
+  InvitedUserDetails, ReferrerUserDetails, UserReferralResponse,
+};
+use artcraft_api_defs::moderation::user_referrals::list_user_referrals_for_user::{
+  ListUserReferralsForUserPathInfo, ListUserReferralsForUserQueryParams,
+  ListUserReferralsForUserSuccessResponse,
+};
 use mysql_queries::queries::user_referrals::list_user_referrals_for_user::{
   list_user_referrals_for_user, ListUserReferralsForUserArgs,
 };
 
 use crate::http_server::common_responses::advanced_common_web_error::AdvancedCommonWebError;
-use crate::http_server::endpoints::moderation::user_referrals::moderator_list_global_user_referrals_handler::{
-  InvitedUserDetails, ReferrerUserDetails, UserReferralResponse,
-};
 use crate::http_server::web_utils::user_session::require_moderator::{
   require_moderator, UseDatabase,
 };
@@ -21,30 +24,6 @@ use crate::state::server_state::ServerState;
 const CURSOR_NAME: &str = "modusrrefu";
 const DEFAULT_LIMIT: u32 = 100;
 const MAX_LIMIT: u32 = 1000;
-
-// --- Request ---
-
-#[derive(Deserialize, ToSchema, IntoParams)]
-pub struct ListUserReferralsForUserQueryParams {
-  pub cursor: Option<String>,
-  pub limit: Option<u32>,
-}
-
-#[derive(Deserialize, ToSchema)]
-pub struct ListUserReferralsForUserPathInfo {
-  pub username: String,
-}
-
-// --- Response ---
-
-#[derive(Serialize, ToSchema)]
-pub struct ListUserReferralsForUserSuccessResponse {
-  pub success: bool,
-  pub referrals: Vec<UserReferralResponse>,
-  pub maybe_cursor: Option<String>,
-}
-
-// --- Handler ---
 
 /// List user referrals for a specific referrer user. Moderators only.
 #[utoipa::path(
