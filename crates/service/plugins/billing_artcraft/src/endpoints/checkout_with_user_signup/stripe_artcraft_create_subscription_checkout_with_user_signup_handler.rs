@@ -5,7 +5,11 @@ use crate::endpoints::checkout_with_user_signup::user_creation_case::user_creati
 use crate::endpoints::checkout_with_user_signup::user_exists_case::user_exists_case;
 use crate::utils::artcraft_stripe_config::ArtcraftStripeConfigWithClient;
 use crate::utils::common_web_error::CommonWebError;
+use mysql_queries::queries::user_referral_codes::lookup_referral_code_by_code::lookup_referral_code_by_code;
+use mysql_queries::queries::user_referrals::insert_user_referral::{insert_user_referral, InsertUserReferralArgs};
 use mysql_queries::queries::users::user::get::get_user_token_by_username_with_executor::get_user_token_by_username_with_executor;
+use tokens::tokens::user_referral_codes::UserReferralCodeToken;
+use tokens::tokens::users::UserToken;
 use actix_artcraft::sessions::user_sessions::http_user_session_manager::HttpUserSessionManager;
 use actix_web::web::{Data, Json};
 use actix_web::{web, HttpRequest, HttpResponse};
@@ -93,29 +97,12 @@ pub async fn stripe_artcraft_create_subscription_checkout_with_user_signup_handl
 
   let maybe_landing_url = request.maybe_landing_url.clone();
 
-  let maybe_referral_partner = request.maybe_referral_username.as_deref()
-    .map(|s| s.trim())
-    .filter(|s| !s.is_empty())
-    .map(|s| s[..s.len().min(32)].to_string());
-
-  // Look up referring user by username (optional, fail-open).
-  let maybe_referral_user_token = match request.maybe_referral_username.as_deref() {
-    Some(raw) => {
-      let lookup_username = raw.trim().to_lowercase();
-      if lookup_username.is_empty() {
-        None
-      } else {
-        match get_user_token_by_username_with_executor(&lookup_username, &mut *mysql_connection).await {
-          Ok(token) => token,
-          Err(err) => {
-            warn!("Referral user lookup failed (continuing): {:?}", err);
-            None
-          }
-        }
-      }
-    }
-    None => None,
-  };
+  // Resolve referral info from code (preferred) or username (fallback).
+  let referral_info = resolve_referral_info(
+    request.maybe_referral_code.as_deref(),
+    request.maybe_referral_username.as_deref(),
+    &mut mysql_connection,
+  ).await;
 
   let maybe_user_metadata = internal_user_lookup
       .lookup_user_from_http_request_and_mysql_connection(&http_request, &mut mysql_connection)
@@ -128,16 +115,34 @@ pub async fn stripe_artcraft_create_subscription_checkout_with_user_signup_handl
   let creation_payload= match maybe_user_metadata {
     None => {
       info!("Creating new user, then creating checkout session...");
-      user_creation_case(
+      let payload = user_creation_case(
         &http_request,
         &price_id,
         &mut mysql_connection,
         &stripe_config,
-        maybe_referral_url,
-        maybe_landing_url,
-        maybe_referral_partner,
-        maybe_referral_user_token,
-      ).await?
+        maybe_referral_url.clone(),
+        maybe_landing_url.clone(),
+        referral_info.maybe_referral_partner,
+        referral_info.maybe_referral_user_token.clone(),
+      ).await?;
+
+      // Record the referral relationship if we resolved a referrer.
+      if let (Some(new_user), Some(referrer_user_token)) = (&payload.maybe_new_user_metadata, &referral_info.maybe_referral_user_token) {
+        if let Err(err) = insert_user_referral(
+          InsertUserReferralArgs {
+            invited_user_token: &new_user.user_token,
+            referrer_user_token,
+            maybe_referral_code_token: referral_info.maybe_referral_code_token.as_ref(),
+            maybe_referral_url: maybe_referral_url.as_deref(),
+            maybe_landing_url: maybe_landing_url.as_deref(),
+          },
+          &mut *mysql_connection,
+        ).await {
+          warn!("Failed to insert user_referral record (continuing): {:?}", err);
+        }
+      }
+
+      payload
     },
     Some(user_metadata) => {
       info!("Creating checkout session for user: {:?}", user_metadata.user_token_typed);
@@ -228,4 +233,76 @@ pub fn create_http_response_new_user(
       .cookie(session_cookie)
       .content_type(CONTENT_TYPE_APPLICATION_JSON)
       .body(body))
+}
+
+struct ResolvedReferralInfo {
+  maybe_referral_partner: Option<String>,
+  maybe_referral_user_token: Option<UserToken>,
+  maybe_referral_code_token: Option<UserReferralCodeToken>,
+}
+
+/// Resolve referral info from code (preferred) or username (fallback).
+async fn resolve_referral_info(
+  maybe_referral_code: Option<&str>,
+  maybe_referral_username: Option<&str>,
+  mysql_connection: &mut sqlx::pool::PoolConnection<sqlx::MySql>,
+) -> ResolvedReferralInfo {
+  // Try referral code first.
+  if let Some(raw_code) = maybe_referral_code {
+    let trimmed = raw_code.trim();
+    if !trimmed.is_empty() {
+      let code_lowercase = trimmed.to_lowercase();
+      match lookup_referral_code_by_code(&code_lowercase, &mut **mysql_connection).await {
+        Ok(Some(result)) => {
+          let partner = trimmed[..trimmed.len().min(32)].to_string();
+          return ResolvedReferralInfo {
+            maybe_referral_partner: Some(partner),
+            maybe_referral_user_token: Some(result.owner_user_token),
+            maybe_referral_code_token: Some(result.token),
+          };
+        }
+        Ok(None) => {
+          // Code not found — fall through to username lookup.
+        }
+        Err(err) => {
+          warn!("Referral code lookup failed (continuing): {:?}", err);
+        }
+      }
+    }
+  }
+
+  // Fall back to referral username.
+  if let Some(raw) = maybe_referral_username {
+    let trimmed = raw.trim();
+    let maybe_partner = if trimmed.is_empty() {
+      None
+    } else {
+      Some(trimmed[..trimmed.len().min(32)].to_string())
+    };
+
+    let lookup_username = trimmed.to_lowercase();
+    let maybe_user_token = if lookup_username.is_empty() {
+      None
+    } else {
+      match get_user_token_by_username_with_executor(&lookup_username, &mut **mysql_connection).await {
+        Ok(token) => token,
+        Err(err) => {
+          warn!("Referral user lookup failed (continuing): {:?}", err);
+          None
+        }
+      }
+    };
+
+    return ResolvedReferralInfo {
+      maybe_referral_partner: maybe_partner,
+      maybe_referral_user_token: maybe_user_token,
+      maybe_referral_code_token: None,
+    };
+  }
+
+  ResolvedReferralInfo {
+    maybe_referral_partner: None,
+    maybe_referral_user_token: None,
+    maybe_referral_code_token: None,
+  }
 }

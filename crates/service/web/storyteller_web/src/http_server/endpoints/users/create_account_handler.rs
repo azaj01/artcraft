@@ -7,9 +7,8 @@ use std::collections::HashMap;
 use std::fmt;
 use std::fmt::Formatter;
 
-use crate::util::cleaners::sanitize_referral_username::sanitize_referral_username;
+use crate::util::lookup::resolve_referral_info::resolve_referral_info;
 use crate::http_server::validations::is_reserved_username::is_reserved_username;
-use mysql_queries::queries::users::user::get::get_user_token_by_username_with_executor::get_user_token_by_username_with_executor;
 use crate::http_server::validations::validate_passwords::validate_passwords;
 use crate::http_server::validations::validate_username::validate_username;
 use crate::util::enroll_in_studio::enroll_in_studio;
@@ -24,6 +23,7 @@ use http_server_common::response::serialize_as_json_error::serialize_as_json_err
 use log::{info, warn};
 use mysql_queries::mediators::firehose_publisher::FirehosePublisher;
 use mysql_queries::queries::users::user::create::create_account_error::CreateAccountError;
+use mysql_queries::queries::user_referrals::insert_user_referral::{insert_user_referral, InsertUserReferralArgs};
 use mysql_queries::queries::users::user::create::create_account_from_email_and_password::{create_account_from_email_and_password, CreateAccountFromEmailPasswordArgs};
 use mysql_queries::queries::users::user_sessions::create_user_session_with_executor::create_user_session_with_executor;
 use password::bcrypt_hash_password::bcrypt_hash_password;
@@ -54,6 +54,10 @@ pub struct CreateAccountRequest {
 
   /// Optional: A referral username or code from a referring user.
   pub maybe_referral_username: Option<String>,
+
+  /// Optional: A referral code created by another user. If present, takes priority over
+  /// `maybe_referral_username` for resolving the referring user.
+  pub maybe_referral_code: Option<String>,
 }
 
 #[derive(ToSchema, Serialize)]
@@ -224,24 +228,12 @@ pub async fn create_account_handler(
       CreateAccountErrorResponse::server_error()
     })?;
 
-  // Look up referring user by username (optional, fail-open).
-  let maybe_referral_user_token = match request.maybe_referral_username.as_deref() {
-    Some(raw) => {
-      let lookup_username = raw.trim().to_lowercase();
-      if lookup_username.is_empty() {
-        None
-      } else {
-        match get_user_token_by_username_with_executor(&lookup_username, &mut *mysql_connection).await {
-          Ok(token) => token,
-          Err(err) => {
-            warn!("Referral user lookup failed (continuing): {:?}", err);
-            None
-          }
-        }
-      }
-    }
-    None => None,
-  };
+  // Resolve referral info from code (preferred) or username (fallback).
+  let referral_info = resolve_referral_info(
+    request.maybe_referral_code.as_deref(),
+    request.maybe_referral_username.as_deref(),
+    &mut mysql_connection,
+  ).await;
 
   let create_account_result = create_account_from_email_and_password(
     CreateAccountFromEmailPasswordArgs {
@@ -252,10 +244,10 @@ pub async fn create_account_handler(
       password_hash: &password_hash,
       ip_address: &ip_address,
       maybe_source,
-      maybe_referral_url,
-      maybe_landing_url,
-      maybe_referral_partner: request.maybe_referral_username.as_deref().and_then(sanitize_referral_username),
-      maybe_referral_user_token: maybe_referral_user_token.as_ref(),
+      maybe_referral_url: maybe_referral_url.clone(),
+      maybe_landing_url: maybe_landing_url.clone(),
+      maybe_referral_partner: referral_info.maybe_referral_partner,
+      maybe_referral_user_token: referral_info.maybe_referral_user_token.as_ref(),
       maybe_user_token: None, // NB: This parameter is for internal testing only
     },
     &mut mysql_connection,
@@ -290,6 +282,22 @@ pub async fn create_account_handler(
   };
 
   info!("new user id: {}", new_user_data.user_id);
+
+  // Record the referral relationship if we resolved a referrer.
+  if let Some(referrer_user_token) = &referral_info.maybe_referral_user_token {
+    if let Err(err) = insert_user_referral(
+      InsertUserReferralArgs {
+        invited_user_token: &new_user_data.user_token,
+        referrer_user_token,
+        maybe_referral_code_token: referral_info.maybe_referral_code_token.as_ref(),
+        maybe_referral_url: maybe_referral_url.as_deref(),
+        maybe_landing_url: maybe_landing_url.as_deref(),
+      },
+      &mut *mysql_connection,
+    ).await {
+      warn!("Failed to insert user_referral record (continuing): {:?}", err);
+    }
+  }
 
   let session_token = create_user_session_with_executor(
     &new_user_data.user_token,
