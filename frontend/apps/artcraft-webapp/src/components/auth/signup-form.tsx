@@ -10,6 +10,7 @@ import { useState } from "react";
 import { UsersApi } from "@storyteller/api";
 import {
   getLandingUrl,
+  getReferralCode,
   getReferralUsername,
   getReferrer,
 } from "@storyteller/common";
@@ -67,6 +68,7 @@ export const SignupForm = ({
       maybeReferralUrl: getReferrer(),
       maybeLandingUrl: getLandingUrl(),
       maybeReferralUsername: getReferralUsername(),
+      maybeReferralCode: getReferralCode(),
     });
 
     setIsLoading(false);

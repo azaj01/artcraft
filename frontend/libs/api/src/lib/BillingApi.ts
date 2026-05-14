@@ -37,12 +37,14 @@ export class BillingApi extends ApiManager {
     maybeReferralUrl,
     maybeLandingUrl,
     maybeReferralUsername,
+    maybeReferralCode,
   }: {
     plan: string;
     cadence: "yearly" | "monthly";
     maybeReferralUrl?: string;
     maybeLandingUrl?: string;
     maybeReferralUsername?: string;
+    maybeReferralCode?: string;
   }): Promise<ApiResponse<{ stripeCheckoutRedirectUrl: string }>> {
     const endpoint = `${this.getApiSchemeAndHost()}/v1/stripe_artcraft/user_signup_subscription_checkout`;
 
@@ -53,6 +55,7 @@ export class BillingApi extends ApiManager {
         maybe_referral_url?: string;
         maybe_landing_url?: string;
         maybe_referral_username?: string;
+        maybe_referral_code?: string;
       },
       {
         success: boolean;
@@ -69,6 +72,7 @@ export class BillingApi extends ApiManager {
         ...(maybeReferralUsername && {
           maybe_referral_username: maybeReferralUsername,
         }),
+        ...(maybeReferralCode && { maybe_referral_code: maybeReferralCode }),
       },
     })
       .then((response) => ({

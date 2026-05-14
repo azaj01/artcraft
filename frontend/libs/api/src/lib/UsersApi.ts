@@ -11,6 +11,7 @@ interface SignupRequest {
   maybe_referral_url?: string;
   maybe_landing_url?: string;
   maybe_referral_username?: string;
+  maybe_referral_code?: string;
 }
 
 export class UsersApi extends ApiManager {
@@ -210,6 +211,7 @@ export class UsersApi extends ApiManager {
     maybeReferralUrl,
     maybeLandingUrl,
     maybeReferralUsername,
+    maybeReferralCode,
   }: {
     username: string;
     email: string;
@@ -219,6 +221,7 @@ export class UsersApi extends ApiManager {
     maybeReferralUrl?: string;
     maybeLandingUrl?: string;
     maybeReferralUsername?: string;
+    maybeReferralCode?: string;
   }): Promise<ApiResponse<{ signedSession?: string }>> {
     const endpoint = `${this.getApiSchemeAndHost()}/v1/create_account`;
     const body: SignupRequest = {
@@ -238,6 +241,9 @@ export class UsersApi extends ApiManager {
     }
     if (maybeReferralUsername) {
       body.maybe_referral_username = maybeReferralUsername;
+    }
+    if (maybeReferralCode) {
+      body.maybe_referral_code = maybeReferralCode;
     }
 
     try {
@@ -280,11 +286,13 @@ export class UsersApi extends ApiManager {
     maybeReferralUrl,
     maybeLandingUrl,
     maybeReferralUsername,
+    maybeReferralCode,
   }: {
     credential: string;
     maybeReferralUrl?: string;
     maybeLandingUrl?: string;
     maybeReferralUsername?: string;
+    maybeReferralCode?: string;
   }): Promise<ApiResponse<{ usernameNotYetCustomized?: boolean }>> {
     const endpoint = `${this.getApiSchemeAndHost()}/v1/accounts/google_sso`;
     const body: {
@@ -292,6 +300,7 @@ export class UsersApi extends ApiManager {
       maybe_referral_url?: string;
       maybe_landing_url?: string;
       maybe_referral_username?: string;
+      maybe_referral_code?: string;
     } = {
       google_credential: credential,
     };
@@ -303,6 +312,9 @@ export class UsersApi extends ApiManager {
     }
     if (maybeReferralUsername) {
       body.maybe_referral_username = maybeReferralUsername;
+    }
+    if (maybeReferralCode) {
+      body.maybe_referral_code = maybeReferralCode;
     }
 
     try {

@@ -2,6 +2,7 @@ import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { UsersApi } from "@storyteller/api";
 import {
   getLandingUrl,
+  getReferralCode,
   getReferralUsername,
   getReferrer,
 } from "@storyteller/common";
@@ -40,6 +41,7 @@ export function GoogleLoginButton({
         maybeReferralUrl: getReferrer(),
         maybeLandingUrl: getLandingUrl(),
         maybeReferralUsername: getReferralUsername(),
+        maybeReferralCode: getReferralCode(),
       });
       if (result.success) {
         window.dispatchEvent(new Event("auth-change"));

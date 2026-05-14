@@ -11,6 +11,7 @@ import { TabSelector } from "@storyteller/ui-tab-selector";
 import { UsersApi, BillingApi, UserInfo } from "@storyteller/api";
 import {
   getLandingUrl,
+  getReferralCode,
   getReferralUsername,
   getReferrer,
 } from "@storyteller/common";
@@ -207,6 +208,7 @@ const PricingTable = ({
           maybeReferralUrl: getReferrer(),
           maybeLandingUrl: getLandingUrl(),
           maybeReferralUsername: getReferralUsername(),
+          maybeReferralCode: getReferralCode(),
         });
 
         if (!response.success || !response.data) {
