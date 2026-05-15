@@ -31,9 +31,10 @@ export async function downloadMediaFile({
   mediaClass?: string | null;
 }): Promise<void> {
   const corsUrl = addCorsParam(url) || url;
+  const fetchUrl = `${corsUrl}&dl=1`;
   let blobUrl: string | null = null;
   try {
-    const response = await fetch(corsUrl, { credentials: "omit" });
+    const response = await fetch(fetchUrl, { credentials: "omit" });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const blob = await response.blob();
     blobUrl = window.URL.createObjectURL(blob);

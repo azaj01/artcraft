@@ -398,7 +398,6 @@ export function Lightbox({
                         <div className="relative flex h-full items-center justify-center overflow-hidden bg-black">
                           <img
                             src={addCorsParam(url) || url}
-                            crossOrigin="anonymous"
                             alt={`Image ${idx + 1}`}
                             className="h-full w-full object-contain"
                             onError={(e) => {
@@ -446,7 +445,6 @@ export function Lightbox({
                           >
                             <img
                               src={addCorsParam(url) || url}
-                              crossOrigin="anonymous"
                               alt={`Thumbnail ${idx + 1}`}
                               className="h-full w-full object-cover bg-black/20"
                             />
