@@ -289,6 +289,12 @@ function PageSceneEditor() {
         showImageTo3DButton={false}
         showHelpMenu={false}
         modelSelectorPlacement="prompt-box"
+        promptboxAboveStackSlot={
+          <OtherScenesOverlay
+            currentSceneToken={sceneToken}
+            demoOutputToken={demoOutputToken}
+          />
+        }
       />
       {/* Controls3D's "My Library" popup item flips the
           galleryModalVisibleViewMode signal — the modal below subscribes
@@ -298,11 +304,6 @@ function PageSceneEditor() {
       <GalleryModal mode="view" />
       <GalleryDragComponent />
       {demoOutputToken && <DemoOutputOverlay outputToken={demoOutputToken} />}
-      <OtherScenesOverlay
-        currentSceneToken={sceneToken}
-        demoOutputToken={demoOutputToken}
-        wrapperRef={wrapperRef}
-      />
       <SceneSplashModal currentSceneToken={sceneToken} />
     </div>
   );

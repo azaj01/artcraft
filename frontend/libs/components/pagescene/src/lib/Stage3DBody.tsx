@@ -83,6 +83,12 @@ export interface Stage3DBodyProps {
    *  renders a compact popover inside the prompt-box toolbar instead,
    *  matching the webapp's other prompt boxes. */
   modelSelectorPlacement?: "bottom-left" | "prompt-box";
+  /** Optional content rendered just above the promptbox stack (image
+   *  row + glass card + toolbar), inside the lib's `bottom-4` anchor.
+   *  Tauri leaves this unset; the webapp uses it for the demo-mode
+   *  "See other demo scenes" affordance so the button stacks above
+   *  the prompt input instead of floating loose over the canvas. */
+  promptboxAboveStackSlot?: React.ReactNode;
 }
 
 export const Stage3DBody = ({
@@ -90,6 +96,7 @@ export const Stage3DBody = ({
   showImageTo3DButton = true,
   showHelpMenu = true,
   modelSelectorPlacement = "bottom-left",
+  promptboxAboveStackSlot,
 }: Stage3DBodyProps = {}) => {
   const camAspect = usePageSceneStore((s) => s.cameraAspectRatio);
   const outlinerShowing = usePageSceneStore((s) => s.outlinerShowing);
@@ -408,8 +415,6 @@ export const Stage3DBody = ({
 
   return (
     <div className="h-full w-full">
-      <OnboardingHelper />
-
       <div className="relative flex h-full w-full">
         <div id="engine-n-panels-wrapper" className="flex h-full w-full">
           <div className="relative w-full overflow-hidden bg-transparent">
@@ -486,6 +491,12 @@ export const Stage3DBody = ({
               }}
               snapshotCurrentFrame={editor?.snapShotOfCurrentFrame.bind(editor)}
               modelSelector={inlineModelSelector}
+              aboveStackSlot={
+                <>
+                  <OnboardingHelper />
+                  {promptboxAboveStackSlot}
+                </>
+              }
               onBeforeSubmit={() => {
                 const currentUserToken =
                   usePageSceneStore.getState().currentUserToken;

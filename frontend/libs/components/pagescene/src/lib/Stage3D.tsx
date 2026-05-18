@@ -43,6 +43,12 @@ export interface Stage3DProps {
    *  hides it and renders a compact selector inside the prompt-box
    *  toolbar instead, matching the webapp's other prompt-box chrome. */
   modelSelectorPlacement?: "bottom-left" | "prompt-box";
+  /** Optional content rendered just above the promptbox stack (image
+   *  row + glass card + toolbar), inside the lib's `bottom-4` anchor.
+   *  Tauri leaves this unset; the webapp uses it for the demo-mode
+   *  "See other demo scenes" affordance so the button stacks above
+   *  the prompt input instead of floating loose over the canvas. */
+  promptboxAboveStackSlot?: React.ReactNode;
 }
 
 export const Stage3D = ({
@@ -54,6 +60,7 @@ export const Stage3D = ({
   showImageTo3DButton = true,
   showHelpMenu = true,
   modelSelectorPlacement = "bottom-left",
+  promptboxAboveStackSlot,
 }: Stage3DProps) => {
   // Engine's remountEngine() gate reads is3DPageMounted. With Stage3D
   // mounting only when the host's tab/route puts us on screen, the
@@ -78,6 +85,7 @@ export const Stage3D = ({
         showImageTo3DButton={showImageTo3DButton}
         showHelpMenu={showHelpMenu}
         modelSelectorPlacement={modelSelectorPlacement}
+        promptboxAboveStackSlot={promptboxAboveStackSlot}
       />
       <DragComponent />
       <PrecisionSelector />

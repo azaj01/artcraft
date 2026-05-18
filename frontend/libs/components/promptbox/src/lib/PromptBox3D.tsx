@@ -81,6 +81,12 @@ interface PromptBox3DProps {
    *  passes a compact selector here so the chrome matches its other
    *  prompt boxes. */
   modelSelector?: ReactNode;
+  /** Optional content rendered immediately above the promptbox stack
+   *  (the image row + glass card + toolbar), inside the lib's
+   *  `bottom-4` anchor so it grows the stack upward instead of
+   *  overlapping it. Tauri leaves this unset; the webapp uses it for
+   *  the demo-mode "See other demo scenes" affordance. */
+  aboveStackSlot?: ReactNode;
   // Optional pre-submit gate. Returns false to abort the generation
   // (e.g. host wants to open a signup modal for anon visitors).
   onBeforeSubmit?: () => boolean;
@@ -111,6 +117,7 @@ export const PromptBox3D = ({
   snapshotCurrentFrame,
   credits,
   modelSelector,
+  aboveStackSlot,
   onBeforeSubmit,
 }: PromptBox3DProps) => {
   //const fileInputRef = useRef<HTMLInputElement>(null);
@@ -595,6 +602,7 @@ export const PromptBox3D = ({
         {content}
       </Modal>
       <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 flex-col gap-3">
+        {aboveStackSlot}
         {selectedImageModel?.canUseImagePrompt && isImageRowVisible && (
           <ImagePromptRow
             visible={true}
