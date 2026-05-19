@@ -26,6 +26,7 @@ import {
 } from "@fortawesome/pro-solid-svg-icons";
 import { faDiscord } from "@fortawesome/free-brands-svg-icons";
 import {
+  appLink,
   SOCIAL_LINKS,
   USE_WEBAPP_FOR_APP_FEATURES,
   WEBAPP_URL,
@@ -37,6 +38,8 @@ type NavEntry = NavLeaf | NavGroup;
 
 const NAV_ITEMS: NavEntry[] = [
   { name: "Home", href: "/" },
+  { name: "Image", href: appLink("/create-image") },
+  { name: "Video", href: appLink("/create-video") },
   {
     name: "Resources",
     children: [
@@ -49,6 +52,8 @@ const NAV_ITEMS: NavEntry[] = [
   { name: "Download", href: "/download" },
   { name: "Support", href: "/support" },
 ];
+
+const isExternalHref = (href: string) => /^https?:\/\//.test(href);
 
 function isGroup(entry: NavEntry): entry is NavGroup {
   return "children" in entry && Array.isArray(entry.children);
@@ -113,13 +118,22 @@ export default function Navbar() {
                         return (
                           <NavigationMenu.Item key={entry.name}>
                             <NavigationMenu.Link asChild>
-                              <Link
-                                to={entry.href}
-                                aria-current={active ? "page" : undefined}
-                                className={twMerge(baseClasses, stateClasses)}
-                              >
-                                {entry.name}
-                              </Link>
+                              {isExternalHref(entry.href) ? (
+                                <a
+                                  href={entry.href}
+                                  className={twMerge(baseClasses, stateClasses)}
+                                >
+                                  {entry.name}
+                                </a>
+                              ) : (
+                                <Link
+                                  to={entry.href}
+                                  aria-current={active ? "page" : undefined}
+                                  className={twMerge(baseClasses, stateClasses)}
+                                >
+                                  {entry.name}
+                                </Link>
+                              )}
                             </NavigationMenu.Link>
                           </NavigationMenu.Item>
                         );
@@ -381,17 +395,27 @@ export default function Navbar() {
                         location.pathname,
                         entry.href,
                       );
-                      return (
+                      const leafClassName = twMerge(
+                        "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                        isCurrent
+                          ? "bg-white/[0.08] text-white"
+                          : "text-white/60 active:bg-white/[0.04]",
+                      );
+                      return isExternalHref(entry.href) ? (
+                        <DisclosureButton
+                          key={entry.name}
+                          as="a"
+                          href={entry.href}
+                          className={leafClassName}
+                        >
+                          {entry.name}
+                        </DisclosureButton>
+                      ) : (
                         <DisclosureButton
                           key={entry.name}
                           as={Link}
                           to={entry.href}
-                          className={twMerge(
-                            "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                            isCurrent
-                              ? "bg-white/[0.08] text-white"
-                              : "text-white/60 active:bg-white/[0.04]",
-                          )}
+                          className={leafClassName}
                         >
                           {entry.name}
                         </DisclosureButton>
