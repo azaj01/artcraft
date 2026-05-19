@@ -88,7 +88,7 @@ const CheckoutSuccess = () => {
 
       <main className="relative z-10 pt-28 pb-20 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
         {/* Success Card */}
-        <div className="max-w-2xl w-full">
+        <div className="max-w-4xl w-full">
           <div className="bg-[#1A1A1E] border border-white/10 rounded-3xl p-8 md:p-12 text-center">
             {/* Success Icon */}
             <div className="mb-6">

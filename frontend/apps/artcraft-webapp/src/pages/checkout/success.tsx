@@ -3,6 +3,11 @@ import {
   faDownload,
   faDesktop,
   faRocket,
+  faImage,
+  faVideo,
+  faWandMagicSparkles,
+  faCube,
+  faArrowRight,
 } from "@fortawesome/pro-solid-svg-icons";
 import { faDiscord } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -72,20 +77,21 @@ const CheckoutSuccess = () => {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#101014] text-white">
+    <div className="relative min-h-full bg-[#101014] text-white">
       <Seo
         title="Payment Successful - ArtCraft"
         description="Your ArtCraft subscription is now active. Download and start creating!"
       />
 
-      {/* Background gradient - celebratory green/purple */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+      {/* Background gradient — clipped to its own wrapper so the outer
+          page can grow naturally and let SidebarInset handle scrolling. */}
+      <div className="absolute inset-0 overflow-hidden flex items-center justify-center pointer-events-none z-0">
         <div className="w-[900px] h-[900px] rounded-full bg-gradient-to-br from-green-500/40 via-primary/30 to-purple-600/20 opacity-40 blur-[120px]"></div>
       </div>
 
-      <main className="relative z-10 pt-28 pb-20 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
+      <main className="relative z-10 pt-12 pb-20 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
         {/* Success Card */}
-        <div className="max-w-2xl w-full">
+        <div className="max-w-4xl w-full">
           <div className="bg-[#1A1A1E] border border-white/10 rounded-3xl p-8 md:p-12 text-center">
             {/* Success Icon */}
             <div className="mb-6">
@@ -106,6 +112,54 @@ const CheckoutSuccess = () => {
               ArtCraft open-source and free for everyone. You're now ready to
               create amazing AI-generated art!
             </p>
+
+            {/* Start creating in the browser */}
+            <div className="bg-[#252529] rounded-2xl p-6 mb-8 text-left">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                  <FontAwesomeIcon
+                    icon={faWandMagicSparkles}
+                    className="text-primary text-sm"
+                  />
+                </div>
+                <h2 className="text-lg font-medium text-white">
+                  Start creating right here
+                </h2>
+              </div>
+              <p className="text-white/60 text-sm mb-4">
+                No download needed - jump straight in from your browser.
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[
+                  { to: "/create-image", icon: faImage, label: "Image" },
+                  { to: "/create-video", icon: faVideo, label: "Video" },
+                  {
+                    to: "/background-change",
+                    icon: faWandMagicSparkles,
+                    label: "BG Change",
+                  },
+                  { to: "/edit-3d", icon: faCube, label: "Edit 3D" },
+                ].map((item) => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className="group flex items-center gap-3 bg-[#1A1A1E] hover:bg-[#222227] border border-white/[0.06] hover:border-white/[0.12] rounded-xl px-4 py-3 transition-all"
+                  >
+                    <FontAwesomeIcon
+                      icon={item.icon}
+                      className="text-primary text-base shrink-0"
+                    />
+                    <span className="text-white/90 font-medium flex-1">
+                      {item.label}
+                    </span>
+                    <FontAwesomeIcon
+                      icon={faArrowRight}
+                      className="text-white/30 text-[11px] transition-transform group-hover:translate-x-0.5"
+                    />
+                  </Link>
+                ))}
+              </div>
+            </div>
 
             {/* Next Steps */}
             <div className="bg-[#252529] rounded-2xl p-6 mb-8 text-left">

@@ -25,8 +25,7 @@ const SeedanceBanner = () => (
 
     <div>
       <h1 className="text-3xl md:text-4xl lg:text-5xl tracking-[-0.035em] font-medium leading-[1.05] mb-3">
-        Seedance 2.0 is{" "}
-        <span className="font-serif-italic">here</span>
+        Seedance 2.0 is <span className="font-serif-italic">here</span>
       </h1>
       <p className="text-white/55 text-base md:text-lg leading-relaxed">
         Generate jaw-dropping AI videos with Seedance 2.0 before it's available
@@ -79,9 +78,7 @@ const Pricing = () => {
       try {
         const api = new UsersApi();
         const res = await api.GetSession();
-        setIsLoggedIn(
-          res.success && !!res.data?.loggedIn && !!res.data?.user,
-        );
+        setIsLoggedIn(res.success && !!res.data?.loggedIn && !!res.data?.user);
       } catch {
         // not logged in
       }
@@ -185,8 +182,8 @@ const Pricing = () => {
                 Invest in <span className="font-serif-italic">yourself</span>.
               </h1>
               <p className="max-w-xl mx-auto text-base sm:text-lg text-white/55 leading-relaxed">
-                Get a ton of generations and invest in a tool you'll always
-                own. Your subscription helps keep ArtCraft free and open for
+                Get a ton of generations and invest in a tool you'll always own.
+                Your subscription helps keep ArtCraft free and open for
                 everyone.
               </p>
             </div>
@@ -215,7 +212,10 @@ const Pricing = () => {
             className="mt-4 gap-2 rounded-full border border-white/[0.1] bg-white/[0.06] hover:bg-white/[0.1] px-5 py-2 h-11 text-[14px] font-semibold text-white"
             onClick={() => setCreditsModalOpen(true)}
           >
-            <FontAwesomeIcon icon={faCoins} className="text-primary text-[13px]" />
+            <FontAwesomeIcon
+              icon={faCoins}
+              className="text-primary text-[13px]"
+            />
             Buy Credits
           </Button>
         </div>

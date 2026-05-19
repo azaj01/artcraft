@@ -138,7 +138,7 @@ const Pricing = () => {
       </main>
 
       {isLoggedIn && (
-        <div className="relative z-10 flex flex-col items-center px-4 pb-12 sm:px-8">
+        <div className="relative z-10 flex flex-col items-center px-4 pb-4 sm:px-8">
           <div className="inline-flex items-center gap-2 text-white/40">
             <div className="h-px w-8 bg-white/20" />
             <span className="text-sm">Or</span>
@@ -162,7 +162,7 @@ const Pricing = () => {
       )}
 
       {/* Footnote */}
-      <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-8 pb-16 text-center">
+      <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-8 pb-16 text-center mt-6">
         <p className="text-sm text-white/45 leading-relaxed">
           &dagger; ArtCraft can be used without paying for a subscription. You
           can bring your own compute and third party subscriptions. We hope

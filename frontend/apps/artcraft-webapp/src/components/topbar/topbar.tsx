@@ -343,6 +343,13 @@ export function TopBar() {
         ) : (
           <>
             <Link
+              to="/pricing"
+              className="hidden lg:flex h-8 items-center gap-1.5 px-3 rounded-lg text-sm font-medium text-white/85 hover:bg-white/[0.04] transition-colors"
+            >
+              <FontAwesomeIcon icon={faGem} className="text-[11px]" />
+              Pricing
+            </Link>
+            <Link
               to="/login"
               className="h-8 flex items-center px-3 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/[0.04] transition-all"
             >

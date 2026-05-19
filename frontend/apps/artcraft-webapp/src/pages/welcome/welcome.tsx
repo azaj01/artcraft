@@ -2,7 +2,11 @@ import {
   faCheckCircle,
   faDownload,
   faDesktop,
-  faRocket,
+  faImage,
+  faVideo,
+  faWandMagicSparkles,
+  faCube,
+  faArrowRight,
 } from "@fortawesome/pro-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button } from "@storyteller/ui-button";
@@ -16,14 +20,15 @@ const Welcome = () => {
   const downloadUrl = isMacOs ? DOWNLOAD_LINKS.MACOS : DOWNLOAD_LINKS.WINDOWS;
 
   return (
-    <div className="relative min-h-full overflow-hidden bg-[#101014] text-white">
+    <div className="relative min-h-full bg-[#101014] text-white">
       <Seo
         title="Welcome - ArtCraft"
         description="Welcome to ArtCraft. Get started with your subscription."
       />
 
-      {/* Background gradient */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+      {/* Background gradient — clipped to its own wrapper so the outer
+          page can grow naturally and let SidebarInset handle scrolling. */}
+      <div className="absolute inset-0 overflow-hidden flex items-center justify-center pointer-events-none z-0">
         <div className="w-[900px] h-[900px] rounded-full bg-gradient-to-br from-primary/40 via-purple-600/30 to-blue-500/20 opacity-30 blur-[120px]"></div>
       </div>
 
@@ -58,22 +63,74 @@ const Welcome = () => {
           />
         </div>
 
-        {/* Next Steps Section */}
-        <div className="max-w-3xl mx-auto">
+        {/* Create-in-browser CTA — desktop download is optional */}
+        <div className="max-w-3xl mx-auto mb-8">
           <div className="bg-[#1A1A1E] border border-white/10 rounded-3xl p-8 md:p-10">
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
                 <FontAwesomeIcon
-                  icon={faRocket}
+                  icon={faWandMagicSparkles}
                   className="text-primary text-lg"
                 />
               </div>
-              <h2 className="text-2xl font-medium text-white">Getting Started</h2>
+              <h2 className="text-2xl font-medium text-white">
+                Start creating right here
+              </h2>
+            </div>
+            <p className="text-white/60 mb-6">
+              No download needed - jump straight in from your browser.
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[
+                { to: "/create-image", icon: faImage, label: "Image" },
+                { to: "/create-video", icon: faVideo, label: "Video" },
+                {
+                  to: "/background-change",
+                  icon: faWandMagicSparkles,
+                  label: "BG Change",
+                },
+                { to: "/edit-3d", icon: faCube, label: "Edit 3D" },
+              ].map((item) => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className="group flex items-center gap-3 bg-[#252529] hover:bg-[#2D2D32] border border-white/[0.06] hover:border-white/[0.12] rounded-xl px-4 py-3 transition-all"
+                >
+                  <FontAwesomeIcon
+                    icon={item.icon}
+                    className="text-primary text-base shrink-0"
+                  />
+                  <span className="text-white/90 font-medium flex-1">
+                    {item.label}
+                  </span>
+                  <FontAwesomeIcon
+                    icon={faArrowRight}
+                    className="text-white/30 text-[11px] transition-transform group-hover:translate-x-0.5"
+                  />
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop app alternative */}
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-[#1A1A1E] border border-white/10 rounded-3xl p-8 md:p-10">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                <FontAwesomeIcon
+                  icon={faDesktop}
+                  className="text-primary text-lg"
+                />
+              </div>
+              <h2 className="text-2xl font-medium text-white">
+                Want the desktop app too?
+              </h2>
             </div>
 
             <p className="text-white/60 mb-6">
-              Your download should have started automatically. Follow these
-              steps to begin creating:
+              Install ArtCraft on Windows or Mac to unlock the full creative
+              suite. After installing:
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">

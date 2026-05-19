@@ -307,7 +307,7 @@ const Onboarding = () => {
           <div className="w-[900px] h-[900px] rounded-full bg-gradient-to-br from-green-500/40 via-primary/30 to-purple-600/20 opacity-40 blur-[120px]"></div>
         </div>
 
-        <main className="relative z-10 pt-28 pb-20 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
+        <main className="relative z-10 pt-20 pb-20 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
           <div className="max-w-md w-full text-center">
             <div className="mb-6">
               <div className="w-20 h-20 mx-auto rounded-full bg-green-500/20 flex items-center justify-center">
@@ -338,7 +338,7 @@ const Onboarding = () => {
         <div className="w-[900px] h-[900px] rounded-full bg-gradient-to-br from-blue-700 via-blue-500 to-[#00AABA] opacity-20 blur-[120px]"></div>
       </div>
 
-      <main className="relative z-10 pt-28 pb-20 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
+      <main className="relative z-10 pt-20 pb-20 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
         <div className="max-w-md w-full">
           {isNewAccount && (
             <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-6 flex items-start gap-3 animate-fade-in shadow-lg shadow-blue-900/10">

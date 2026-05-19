@@ -126,6 +126,11 @@ export function App() {
           <Route path="/edit-3d/:sceneToken" element={<PageScene />} />
           <Route path="/support" element={<Support />} />
           <Route path="/pricing" element={<Pricing />} />
+          {/* Welcome is public so it stays reachable right after signup
+              without losing the race against the session refresh that
+              RequireAuth reads. The page itself drives the pricing/Stripe
+              handoff via PricingTable. */}
+          <Route path="/welcome" element={<Welcome />} />
 
           {/* Protected — sign-in required (user-owned content / billing flows) */}
           <Route element={<RequireAuth />}>
@@ -134,7 +139,6 @@ export function App() {
             <Route path="/library" element={<Library />} />
             <Route path="/library/:filter" element={<Library />} />
             <Route path="/referrals" element={<Referrals />} />
-            <Route path="/welcome" element={<Welcome />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/checkout/success" element={<CheckoutSuccess />} />
             <Route path="/checkout/cancel" element={<CheckoutCancel />} />
