@@ -83,7 +83,10 @@ if [ ! -d "$DASH_DIR" ]; then
 fi
 
 shopt -s nullglob
-files=("$DASH_DIR"/*.json)
+# Recurse into subdirs (per_endpoint/, etc.) so dashboards can be
+# organized by category without changing this script.
+files=()
+while IFS= read -r f; do files+=("$f"); done < <(find "$DASH_DIR" -type f -name '*.json' | sort)
 if [ ${#files[@]} -eq 0 ]; then
   echo "no dashboard JSON files in $DASH_DIR" >&2
   exit 0
