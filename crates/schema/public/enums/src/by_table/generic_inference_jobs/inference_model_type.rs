@@ -101,6 +101,10 @@ pub enum InferenceModelType {
   GptImage2,
   #[serde(rename = "grok_image")]
   GrokImage,
+  #[serde(rename = "grok_imagine_image")]
+  GrokImagineImage,
+  #[serde(rename = "grok_imagine_image_q")]
+  GrokImagineImageQuality,
   #[serde(rename = "recraft_3")]
   Recraft3,
   #[serde(rename = "seededit_3")]
@@ -143,6 +147,8 @@ pub enum InferenceModelType {
   // Video models
   #[serde(rename = "grok_video")]
   GrokVideo,
+  #[serde(rename = "grok_imagine_video")]
+  GrokImagineVideo,
   #[serde(rename = "kling_1p6_pro")]
   Kling16Pro,
   #[serde(rename = "kling_2p1_pro")]
@@ -251,6 +257,8 @@ impl InferenceModelType {
       Self::GptImage1p5 => "gpt_image_1p5",
       Self::GptImage2 => "gpt_image_2",
       Self::GrokImage => "grok_image",
+      Self::GrokImagineImage => "grok_imagine_image",
+      Self::GrokImagineImageQuality => "grok_imagine_image_q",
       Self::Recraft3 => "recraft_3",
       Self::SeedEdit3 => "seededit_3",
       Self::Qwen => "qwen",
@@ -273,6 +281,7 @@ impl InferenceModelType {
 
       // Video models
       Self::GrokVideo => "grok_video",
+      Self::GrokImagineVideo => "grok_imagine_video",
       Self::Kling16Pro => "kling_1p6_pro",
       Self::Kling21Pro => "kling_2p1_pro",
       Self::Kling21Master => "kling_2p1_master",
@@ -344,6 +353,8 @@ impl InferenceModelType {
       "gpt_image_1p5" => Ok(Self::GptImage1p5),
       "gpt_image_2" => Ok(Self::GptImage2),
       "grok_image" => Ok(Self::GrokImage),
+      "grok_imagine_image" => Ok(Self::GrokImagineImage),
+      "grok_imagine_image_q" => Ok(Self::GrokImagineImageQuality),
       "recraft_3" => Ok(Self::Recraft3),
       "seededit_3" => Ok(Self::SeedEdit3),
       "qwen" => Ok(Self::Qwen),
@@ -366,6 +377,7 @@ impl InferenceModelType {
 
       // Video models
       "grok_video" => Ok(Self::GrokVideo),
+      "grok_imagine_video" => Ok(Self::GrokImagineVideo),
       "kling_1p6_pro" => Ok(Self::Kling16Pro),
       "kling_2p1_pro" => Ok(Self::Kling21Pro),
       "kling_2p1_master" => Ok(Self::Kling21Master),
@@ -441,6 +453,8 @@ impl InferenceModelType {
       Self::GptImage1p5,
       Self::GptImage2,
       Self::GrokImage,
+      Self::GrokImagineImage,
+      Self::GrokImagineImageQuality,
       Self::Recraft3,
       Self::SeedEdit3,
       Self::Qwen,
@@ -463,6 +477,7 @@ impl InferenceModelType {
 
       // Video models
       Self::GrokVideo,
+      Self::GrokImagineVideo,
       Self::Kling16Pro,
       Self::Kling21Pro,
       Self::Kling21Master,
@@ -521,6 +536,8 @@ impl InferenceModelType {
       CommonModelType::GptImage1p5 => Self::GptImage1p5,
       CommonModelType::GptImage2 => Self::GptImage2,
       CommonModelType::GrokImage => Self::GrokImage,
+      CommonModelType::GrokImagineImage => Self::GrokImagineImage,
+      CommonModelType::GrokImagineImageQuality => Self::GrokImagineImageQuality,
       CommonModelType::Recraft3 => Self::Recraft3,
       CommonModelType::SeedEdit3 => Self::SeedEdit3,
       CommonModelType::Qwen => Self::Qwen,
@@ -543,6 +560,7 @@ impl InferenceModelType {
 
       // Video models
       CommonModelType::GrokVideo => Self::GrokVideo,
+      CommonModelType::GrokImagineVideo => Self::GrokImagineVideo,
       CommonModelType::Kling16Pro => Self::Kling16Pro,
       CommonModelType::Kling21Pro => Self::Kling21Pro,
       CommonModelType::Kling21Master => Self::Kling21Master,
@@ -624,6 +642,8 @@ mod tests {
       assert_serialization(InferenceModelType::GptImage1p5, "gpt_image_1p5");
       assert_serialization(InferenceModelType::GptImage2, "gpt_image_2");
       assert_serialization(InferenceModelType::GrokImage, "grok_image");
+      assert_serialization(InferenceModelType::GrokImagineImage, "grok_imagine_image");
+      assert_serialization(InferenceModelType::GrokImagineImageQuality, "grok_imagine_image_q");
       assert_serialization(InferenceModelType::Recraft3, "recraft_3");
       assert_serialization(InferenceModelType::SeedEdit3, "seededit_3");
       assert_serialization(InferenceModelType::Qwen, "qwen");
@@ -646,6 +666,7 @@ mod tests {
 
       // Video models
       assert_serialization(InferenceModelType::GrokVideo, "grok_video");
+      assert_serialization(InferenceModelType::GrokImagineVideo, "grok_imagine_video");
       assert_serialization(InferenceModelType::Kling16Pro, "kling_1p6_pro");
       assert_serialization(InferenceModelType::Kling21Pro, "kling_2p1_pro");
       assert_serialization(InferenceModelType::Kling21Master, "kling_2p1_master");
@@ -716,6 +737,8 @@ mod tests {
       assert_eq!(InferenceModelType::GptImage1p5.to_str(), "gpt_image_1p5");
       assert_eq!(InferenceModelType::GptImage2.to_str(), "gpt_image_2");
       assert_eq!(InferenceModelType::GrokImage.to_str(), "grok_image");
+      assert_eq!(InferenceModelType::GrokImagineImage.to_str(), "grok_imagine_image");
+      assert_eq!(InferenceModelType::GrokImagineImageQuality.to_str(), "grok_imagine_image_q");
       assert_eq!(InferenceModelType::Recraft3.to_str(), "recraft_3");
       assert_eq!(InferenceModelType::SeedEdit3.to_str(), "seededit_3");
       assert_eq!(InferenceModelType::Qwen.to_str(), "qwen");
@@ -738,6 +761,7 @@ mod tests {
 
       // Video models
       assert_eq!(InferenceModelType::GrokVideo.to_str(), "grok_video");
+      assert_eq!(InferenceModelType::GrokImagineVideo.to_str(), "grok_imagine_video");
       assert_eq!(InferenceModelType::Kling16Pro.to_str(), "kling_1p6_pro");
       assert_eq!(InferenceModelType::Kling21Pro.to_str(), "kling_2p1_pro");
       assert_eq!(InferenceModelType::Kling21Master.to_str(), "kling_2p1_master");
@@ -808,6 +832,8 @@ mod tests {
       assert_eq!(InferenceModelType::from_str("gpt_image_1p5").unwrap(), InferenceModelType::GptImage1p5);
       assert_eq!(InferenceModelType::from_str("gpt_image_2").unwrap(), InferenceModelType::GptImage2);
       assert_eq!(InferenceModelType::from_str("grok_image").unwrap(), InferenceModelType::GrokImage);
+      assert_eq!(InferenceModelType::from_str("grok_imagine_image").unwrap(), InferenceModelType::GrokImagineImage);
+      assert_eq!(InferenceModelType::from_str("grok_imagine_image_q").unwrap(), InferenceModelType::GrokImagineImageQuality);
       assert_eq!(InferenceModelType::from_str("recraft_3").unwrap(), InferenceModelType::Recraft3);
       assert_eq!(InferenceModelType::from_str("seededit_3").unwrap(), InferenceModelType::SeedEdit3);
       assert_eq!(InferenceModelType::from_str("qwen").unwrap(), InferenceModelType::Qwen);
@@ -830,6 +856,7 @@ mod tests {
 
       // Video models
       assert_eq!(InferenceModelType::from_str("grok_video").unwrap(), InferenceModelType::GrokVideo);
+      assert_eq!(InferenceModelType::from_str("grok_imagine_video").unwrap(), InferenceModelType::GrokImagineVideo);
       assert_eq!(InferenceModelType::from_str("kling_1p6_pro").unwrap(), InferenceModelType::Kling16Pro);
       assert_eq!(InferenceModelType::from_str("kling_2p1_pro").unwrap(), InferenceModelType::Kling21Pro);
       assert_eq!(InferenceModelType::from_str("kling_2p1_master").unwrap(), InferenceModelType::Kling21Master);

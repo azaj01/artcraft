@@ -34,6 +34,7 @@ use crate::http_server::endpoints::generate::common::payments_error_test::paymen
 use crate::http_server::endpoints::omni_gen::generate::video::helpers::hydrate_router_request::hydrate_to_router_request;
 use crate::http_server::endpoints::omni_gen::generate::video::insert_db_job::insert_fal_job::{insert_fal_job, InsertFalJobArgs};
 use crate::http_server::endpoints::omni_gen::generate::video::insert_db_job::insert_gmicloud_job::{insert_gmicloud_job, InsertGmiCloudJobArgs};
+use crate::http_server::endpoints::omni_gen::generate::video::insert_db_job::insert_grok_api_job::{insert_grok_api_job, InsertGrokApiJobArgs};
 use crate::http_server::endpoints::omni_gen::generate::video::insert_db_job::insert_seedance2pro_jobs::{insert_seedance2pro_jobs, InsertSeedance2proJobsArgs};
 use crate::http_server::endpoints::omni_gen::generate::video::insert_db_job::shared_job_args::SharedJobArgs;
 use crate::http_server::endpoints::omni_gen::generate::video::pipeline_v1::run_pipeline_v1::{run_pipeline_v1, RunPipelineV1Args};
@@ -193,6 +194,7 @@ pub async fn omni_gen_video_generate_handler(
     Some(CommonVideoModel::Seedance2p0BytePlusFast) => true,
     Some(CommonVideoModel::PreviewModel) => true,
     Some(CommonVideoModel::PreviewModelFast) => true,
+    Some(CommonVideoModel::GrokImagineVideo) => true,
     _ => false,
   };
 
@@ -254,6 +256,23 @@ pub async fn omni_gen_video_generate_handler(
         phantom: Default::default(),
       }).await {
         warn!("Failed to insert Fal request debug log: {:?}", err);
+      }
+    }
+  }
+
+  // ==================== DEBUG LOG: GROK API REQUEST ==================== //
+
+  if let GenerateVideoResponse::Grok(ref grok_payload) = pipeline_result.response {
+    if let Some(ref outbound_request) = grok_payload.maybe_outbound_request {
+      if let Err(err) = insert_debug_log(InsertDebugLogArgs {
+        apriori_debug_log_event_token: Some(&debug_log_event_token),
+        maybe_creator_user_token: Some(user_token),
+        debug_log_type: DebugLogType::GrokApiRequest,
+        message: &format!("{:#?}", outbound_request),
+        mysql_executor: &mut *mysql_connection,
+        phantom: Default::default(),
+      }).await {
+        warn!("Failed to insert Grok API request debug log: {:?}", err);
       }
     }
   }
@@ -399,6 +418,28 @@ pub async fn omni_gen_video_generate_handler(
     GenerateVideoResponse::GmiCloud(payload) => {
       info!("Inserting GmiCloud job with token: {:?}", pipeline_result.billing.apriori_job_token);
       let token = insert_gmicloud_job(InsertGmiCloudJobArgs {
+        external_request_id: &payload.request_id,
+        shared: SharedJobArgs {
+          apriori_job_token: &pipeline_result.billing.apriori_job_token,
+          idempotency_token: &idempotency_token,
+          user_token,
+          maybe_avt_token: maybe_avt_token.as_ref(),
+          maybe_model_type: request.model.map(|v| v.to_common_model_type()),
+          maybe_prompt_token: prompt_token.as_ref(),
+          maybe_debug_log_event_token: Some(&debug_log_event_token),
+          ip_address: &ip_address,
+          transaction: &mut transaction,
+        },
+      }).await?;
+
+      (
+        token.clone(),
+        vec![token],
+      )
+    }
+    GenerateVideoResponse::Grok(payload) => {
+      info!("Inserting Grok (xAI) API job with token: {:?}", pipeline_result.billing.apriori_job_token);
+      let token = insert_grok_api_job(InsertGrokApiJobArgs {
         external_request_id: &payload.request_id,
         shared: SharedJobArgs {
           apriori_job_token: &pipeline_result.billing.apriori_job_token,

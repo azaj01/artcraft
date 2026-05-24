@@ -53,6 +53,12 @@ pub enum CommonModelType {
   // Generic grok image model without a version
   #[serde(rename = "grok_image")]
   GrokImage,
+  // xAI's Grok Imagine image model (grok-imagine-image), standard tier.
+  #[serde(rename = "grok_imagine_image")]
+  GrokImagineImage,
+  // xAI's Grok Imagine image model (grok-imagine-image-quality), high-quality tier.
+  #[serde(rename = "grok_imagine_image_q")]
+  GrokImagineImageQuality,
   #[serde(rename = "recraft_3")]
   Recraft3,
   #[serde(rename = "seededit_3")]
@@ -101,9 +107,16 @@ pub enum CommonModelType {
 
   // Video models
   
-  // Generic grok video model without a version
+  /// Generic grok video model without a version
+  /// NB: This was for the consumer web login API
+  #[deprecated(note = "use GrokImagineVideo instead")]
   #[serde(rename = "grok_video")]
-  GrokVideo, 
+  GrokVideo,
+  /// xAI's Grok Imagine video model (grok-imagine-video).
+  /// This is for the API-based version.
+  /// No version is specified.
+  #[serde(rename = "grok_imagine_video")]
+  GrokImagineVideo,
   #[serde(rename = "kling_1p6_pro")]
   Kling16Pro,
   #[serde(rename = "kling_2p1_pro")]
@@ -196,6 +209,8 @@ impl CommonModelType {
       Self::GptImage1p5 => "gpt_image_1p5",
       Self::GptImage2 => "gpt_image_2",
       Self::GrokImage => "grok_image",
+      Self::GrokImagineImage => "grok_imagine_image",
+      Self::GrokImagineImageQuality => "grok_imagine_image_q",
       Self::Recraft3 => "recraft_3",
       Self::SeedEdit3 => "seededit_3",
       Self::Qwen => "qwen",
@@ -218,6 +233,7 @@ impl CommonModelType {
 
       // Video models
       Self::GrokVideo => "grok_video",
+      Self::GrokImagineVideo => "grok_imagine_video",
       Self::Kling16Pro => "kling_1p6_pro",
       Self::Kling21Pro => "kling_2p1_pro",
       Self::Kling21Master => "kling_2p1_master",
@@ -272,6 +288,8 @@ impl CommonModelType {
       "gpt_image_1p5" => Ok(Self::GptImage1p5),
       "gpt_image_2" => Ok(Self::GptImage2),
       "grok_image" => Ok(Self::GrokImage),
+      "grok_imagine_image" => Ok(Self::GrokImagineImage),
+      "grok_imagine_image_q" => Ok(Self::GrokImagineImageQuality),
       "recraft_3" => Ok(Self::Recraft3),
       "seededit_3" => Ok(Self::SeedEdit3),
       "qwen" => Ok(Self::Qwen),
@@ -294,6 +312,7 @@ impl CommonModelType {
 
       // Video models
       "grok_video" => Ok(Self::GrokVideo),
+      "grok_imagine_video" => Ok(Self::GrokImagineVideo),
       "kling_1p6_pro" => Ok(Self::Kling16Pro),
       "kling_2p1_pro" => Ok(Self::Kling21Pro),
       "kling_2p1_master" => Ok(Self::Kling21Master),
@@ -352,6 +371,8 @@ impl CommonModelType {
       Self::GptImage1p5,
       Self::GptImage2,
       Self::GrokImage,
+      Self::GrokImagineImage,
+      Self::GrokImagineImageQuality,
       Self::Recraft3,
       Self::SeedEdit3,
       Self::Qwen,
@@ -374,6 +395,7 @@ impl CommonModelType {
 
       // Video models
       Self::GrokVideo,
+      Self::GrokImagineVideo,
       Self::Kling16Pro,
       Self::Kling21Pro,
       Self::Kling21Master,
@@ -429,6 +451,8 @@ impl CommonModelType {
       Self::GptImage1p5 => CommonModelClass::Image,
       Self::GptImage2 => CommonModelClass::Image,
       Self::GrokImage => CommonModelClass::Image,
+      Self::GrokImagineImage => CommonModelClass::Image,
+      Self::GrokImagineImageQuality => CommonModelClass::Image,
       Self::Recraft3 => CommonModelClass::Image,
       Self::SeedEdit3 => CommonModelClass::Image,
       Self::Qwen => CommonModelClass::Image,
@@ -451,6 +475,7 @@ impl CommonModelType {
 
       // Video models
       Self::GrokVideo => CommonModelClass::Video,
+      Self::GrokImagineVideo => CommonModelClass::Video,
       Self::Kling16Pro => CommonModelClass::Video,
       Self::Kling21Pro => CommonModelClass::Video,
       Self::Kling21Master => CommonModelClass::Video,
@@ -516,6 +541,8 @@ mod tests {
       assert_serialization(CommonModelType::GptImage1p5, "gpt_image_1p5");
       assert_serialization(CommonModelType::GptImage2, "gpt_image_2");
       assert_serialization(CommonModelType::GrokImage, "grok_image");
+      assert_serialization(CommonModelType::GrokImagineImage, "grok_imagine_image");
+      assert_serialization(CommonModelType::GrokImagineImageQuality, "grok_imagine_image_q");
       assert_serialization(CommonModelType::Recraft3, "recraft_3");
       assert_serialization(CommonModelType::SeedEdit3, "seededit_3");
       assert_serialization(CommonModelType::Qwen, "qwen");
@@ -537,6 +564,7 @@ mod tests {
       assert_serialization(CommonModelType::MidjourneyV7Raw, "midjourney_v7_raw");
       // Video models
       assert_serialization(CommonModelType::GrokVideo, "grok_video");
+      assert_serialization(CommonModelType::GrokImagineVideo, "grok_imagine_video");
       assert_serialization(CommonModelType::Kling16Pro, "kling_1p6_pro");
       assert_serialization(CommonModelType::Kling21Pro, "kling_2p1_pro");
       assert_serialization(CommonModelType::Kling21Master, "kling_2p1_master");
@@ -588,6 +616,8 @@ mod tests {
       assert_eq!(CommonModelType::GptImage1p5.to_str(), "gpt_image_1p5");
       assert_eq!(CommonModelType::GptImage2.to_str(), "gpt_image_2");
       assert_eq!(CommonModelType::GrokImage.to_str(), "grok_image");
+      assert_eq!(CommonModelType::GrokImagineImage.to_str(), "grok_imagine_image");
+      assert_eq!(CommonModelType::GrokImagineImageQuality.to_str(), "grok_imagine_image_q");
       assert_eq!(CommonModelType::Recraft3.to_str(), "recraft_3");
       assert_eq!(CommonModelType::SeedEdit3.to_str(), "seededit_3");
       assert_eq!(CommonModelType::Qwen.to_str(), "qwen");
@@ -610,6 +640,7 @@ mod tests {
 
       // Video models
       assert_eq!(CommonModelType::GrokVideo.to_str(), "grok_video");
+      assert_eq!(CommonModelType::GrokImagineVideo.to_str(), "grok_imagine_video");
       assert_eq!(CommonModelType::Kling16Pro.to_str(), "kling_1p6_pro");
       assert_eq!(CommonModelType::Kling21Pro.to_str(), "kling_2p1_pro");
       assert_eq!(CommonModelType::Kling21Master.to_str(), "kling_2p1_master");
@@ -662,6 +693,8 @@ mod tests {
       assert_eq!(CommonModelType::from_str("gpt_image_1p5").unwrap(), CommonModelType::GptImage1p5);
       assert_eq!(CommonModelType::from_str("gpt_image_2").unwrap(), CommonModelType::GptImage2);
       assert_eq!(CommonModelType::from_str("grok_image").unwrap(), CommonModelType::GrokImage);
+      assert_eq!(CommonModelType::from_str("grok_imagine_image").unwrap(), CommonModelType::GrokImagineImage);
+      assert_eq!(CommonModelType::from_str("grok_imagine_image_q").unwrap(), CommonModelType::GrokImagineImageQuality);
       assert_eq!(CommonModelType::from_str("recraft_3").unwrap(), CommonModelType::Recraft3);
       assert_eq!(CommonModelType::from_str("seededit_3").unwrap(), CommonModelType::SeedEdit3);
       assert_eq!(CommonModelType::from_str("qwen").unwrap(), CommonModelType::Qwen);
@@ -683,6 +716,7 @@ mod tests {
       assert_eq!(CommonModelType::from_str("midjourney_v7_raw").unwrap(), CommonModelType::MidjourneyV7Raw);
       // Video models
       assert_eq!(CommonModelType::from_str("grok_video").unwrap(), CommonModelType::GrokVideo);
+      assert_eq!(CommonModelType::from_str("grok_imagine_video").unwrap(), CommonModelType::GrokImagineVideo);
       assert_eq!(CommonModelType::from_str("kling_1p6_pro").unwrap(), CommonModelType::Kling16Pro);
       assert_eq!(CommonModelType::from_str("kling_2p1_pro").unwrap(), CommonModelType::Kling21Pro);
       assert_eq!(CommonModelType::from_str("kling_2p1_master").unwrap(), CommonModelType::Kling21Master);
@@ -723,7 +757,7 @@ mod tests {
     #[test]
     fn all_variants() {
       let mut variants = CommonModelType::all_variants();
-      assert_eq!(variants.len(), 64);
+      assert_eq!(variants.len(), 67);
       // Image models
       assert_eq!(variants.pop_first(), Some(CommonModelType::Flux1Dev));
       assert_eq!(variants.pop_first(), Some(CommonModelType::Flux1Schnell));
@@ -737,6 +771,8 @@ mod tests {
       assert_eq!(variants.pop_first(), Some(CommonModelType::GptImage1p5));
       assert_eq!(variants.pop_first(), Some(CommonModelType::GptImage2));
       assert_eq!(variants.pop_first(), Some(CommonModelType::GrokImage));
+      assert_eq!(variants.pop_first(), Some(CommonModelType::GrokImagineImage));
+      assert_eq!(variants.pop_first(), Some(CommonModelType::GrokImagineImageQuality));
       assert_eq!(variants.pop_first(), Some(CommonModelType::Recraft3));
       assert_eq!(variants.pop_first(), Some(CommonModelType::SeedEdit3));
       assert_eq!(variants.pop_first(), Some(CommonModelType::Qwen));
@@ -758,6 +794,7 @@ mod tests {
       assert_eq!(variants.pop_first(), Some(CommonModelType::MidjourneyV7Raw));
       // Video models
       assert_eq!(variants.pop_first(), Some(CommonModelType::GrokVideo));
+      assert_eq!(variants.pop_first(), Some(CommonModelType::GrokImagineVideo));
       assert_eq!(variants.pop_first(), Some(CommonModelType::Kling16Pro));
       assert_eq!(variants.pop_first(), Some(CommonModelType::Kling21Pro));
       assert_eq!(variants.pop_first(), Some(CommonModelType::Kling21Master));

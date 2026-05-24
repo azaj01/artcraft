@@ -803,6 +803,7 @@ dependencies = [
  "enums",
  "fal_client",
  "gmicloud_client",
+ "grok_api_client",
  "log",
  "muapi_client",
  "reqwest 0.12.23",
@@ -4895,6 +4896,40 @@ dependencies = [
  "smallvec",
  "spinning_top",
  "web-time",
+]
+
+[[package]]
+name = "grok-api-job"
+version = "0.0.1"
+dependencies = [
+ "actix-web",
+ "actix_helpers",
+ "anyhow",
+ "bootstrap",
+ "bucket_paths",
+ "cloud_storage",
+ "concurrency",
+ "easyenv",
+ "enums",
+ "errors",
+ "grok_api_client",
+ "hashing",
+ "jobs_common",
+ "log",
+ "mysql_queries",
+ "pager",
+ "reqwest 0.12.23",
+ "rootly_client",
+ "rootly_config",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "server_environment",
+ "shared_env_var_config",
+ "sqlx",
+ "tokens",
+ "tokio",
+ "workspace-build-acceleration",
 ]
 
 [[package]]
@@ -11518,6 +11553,7 @@ dependencies = [
  "futures-util",
  "gmicloud_client",
  "google_sign_in",
+ "grok_api_client",
  "hashing",
  "hostname 0.4.0",
  "http_server_common",
