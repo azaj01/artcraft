@@ -711,7 +711,7 @@ dependencies = [
  "fal_client",
  "filesys",
  "futures 0.3.32",
- "grok_client",
+ "grok_consumer_client",
  "image",
  "images",
  "indexmap 2.13.0",
@@ -4898,7 +4898,24 @@ dependencies = [
 ]
 
 [[package]]
-name = "grok_client"
+name = "grok_api_client"
+version = "0.0.1"
+dependencies = [
+ "anyhow",
+ "env_logger 0.11.9",
+ "errors",
+ "log",
+ "reqwest 0.12.23",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "test_data",
+ "tokio",
+ "workspace-build-acceleration",
+]
+
+[[package]]
+name = "grok_consumer_client"
 version = "0.0.1"
 dependencies = [
  "anyhow",
