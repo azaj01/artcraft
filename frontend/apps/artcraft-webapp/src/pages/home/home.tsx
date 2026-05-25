@@ -8,6 +8,7 @@ import {
   faArrowRight,
 } from "@fortawesome/pro-solid-svg-icons";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import Seo from "../../components/seo";
 
 type AppCard = {
   label: string;
@@ -61,6 +62,10 @@ const APPS: AppCard[] = [
 export function Home() {
   return (
     <div className="min-h-full px-6 sm:px-10 py-10 sm:py-16 max-w-6xl mx-auto w-full">
+      <Seo
+        title="ArtCraft - Create AI Images and Video"
+        description="Generate AI images and video with ArtCraft."
+      />
       <h1 className="text-center font-display text-4xl sm:text-6xl mx-auto font-semibold tracking-tight">
         What will you <span className="text-primary">craft</span> today?
       </h1>
