@@ -328,6 +328,7 @@ export class UsersApi extends ApiManager {
         },
         {
           success: boolean;
+          signed_session?: string;
           username_not_yet_customized?: boolean;
           error_message?: string;
         }
@@ -335,6 +336,12 @@ export class UsersApi extends ApiManager {
         method: "POST",
         body: body,
       });
+
+      // Store the signed session so auth survives where the cross-domain
+      // cookie is blocked (e.g. Safari ITP) — mirrors Login/Signup.
+      if (response.success && response.signed_session) {
+        storeSignedSession(response.signed_session);
+      }
 
       return {
         success: response.success,
