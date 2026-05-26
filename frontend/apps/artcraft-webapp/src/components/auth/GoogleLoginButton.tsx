@@ -8,7 +8,7 @@ import {
 } from "@storyteller/common";
 import { faSpinnerThird } from "@fortawesome/pro-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface GoogleLoginButtonProps {
   onSuccess: (isNewUser: boolean) => void;
@@ -24,6 +24,17 @@ export function GoogleLoginButton({
   className = "",
 }: GoogleLoginButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
+
+  // Defer mounting Google's GSI widget until after first paint. Its cross-site
+  // init stalls for several seconds on mobile Safari (ITP throttles
+  // accounts.google.com), so mounting it inline blocks the surrounding UI (e.g.
+  // the signup modal) from appearing. The custom visual button below shows
+  // instantly; the real Google button hydrates a frame later.
+  const [mountGsi, setMountGsi] = useState(false);
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setMountGsi(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
 
   const handleGoogleSuccess = async (
     credentialResponse: CredentialResponse,
@@ -75,19 +86,23 @@ export function GoogleLoginButton({
         )}
       </div>
 
-      {/* Google's actual button - invisible overlay that receives clicks */}
-      <div
-        className="absolute inset-0 w-full h-full overflow-hidden cursor-pointer flex items-center justify-center"
-        style={{ opacity: 0.01, zIndex: 10, transform: "scaleY(1.2)" }}
-      >
-        <GoogleLogin
-          onSuccess={handleGoogleSuccess}
-          onError={() => onError("Google login failed")}
-          size="large"
-          width={400}
-          text="continue_with"
-        />
-      </div>
+      {/* Google's actual button - invisible overlay that receives clicks.
+          Mounted after first paint (see mountGsi) so its slow cross-site init
+          never blocks the surrounding UI from showing. */}
+      {mountGsi && (
+        <div
+          className="absolute inset-0 w-full h-full overflow-hidden cursor-pointer flex items-center justify-center"
+          style={{ opacity: 0.01, zIndex: 10, transform: "scaleY(1.2)" }}
+        >
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => onError("Google login failed")}
+            size="large"
+            width={400}
+            text="continue_with"
+          />
+        </div>
+      )}
     </div>
   );
 }
