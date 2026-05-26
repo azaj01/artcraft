@@ -11,7 +11,8 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { UsersApi } from "@storyteller/api";
 import { AuthHeader, AuthFooter, GoogleLoginButton } from "../../components/auth";
 import Seo from "../../components/seo";
-import { consumeNewUserWelcome, refreshSession } from "../../lib/session";
+import { refreshSession } from "../../lib/session";
+import { hasActiveSubscription } from "../../lib/billing";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -48,16 +49,14 @@ const Login = () => {
     }
   };
 
-  const handleGoogleSuccess = async (isNewUser: boolean) => {
-    // Refresh so the session store reflects the new cookie before navigating.
-    await refreshSession(true);
-    if (consumeNewUserWelcome(isNewUser)) {
-      // Brand-new accounts see the welcome page once (mirrors the signup flow);
-      // returning users go wherever they were headed.
-      navigate("/welcome");
-    } else {
-      navigate(redirectTo);
-    }
+  const handleGoogleSuccess = async () => {
+    // Refresh the session (so the app sees the new cookie) and check the
+    // subscription in parallel; users without one are pushed to pricing.
+    const [, subscribed] = await Promise.all([
+      refreshSession(true),
+      hasActiveSubscription(),
+    ]);
+    navigate(subscribed ? redirectTo : "/pricing");
   };
 
   const handleGoogleError = (message: string) => {

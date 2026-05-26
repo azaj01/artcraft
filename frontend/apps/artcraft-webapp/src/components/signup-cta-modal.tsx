@@ -6,7 +6,8 @@ import { faCheck } from "@fortawesome/pro-solid-svg-icons";
 import { Modal } from "@storyteller/ui-modal";
 import { Button } from "@storyteller/ui-button";
 import { GoogleLoginButton } from "./auth";
-import { consumeNewUserWelcome, refreshSession, useSession } from "../lib/session";
+import { refreshSession, useSession } from "../lib/session";
+import { hasActiveSubscription } from "../lib/billing";
 
 interface SignupCtaState {
   isOpen: boolean;
@@ -50,14 +51,17 @@ export function SignupCtaModal() {
   const from = encodeURIComponent(location.pathname + location.search);
   const [error, setError] = useState<string | null>(null);
 
-  // Mirror the login/signup pages: refresh the session so it reflects the new
-  // cookie, then send brand-new accounts to the welcome page (once). Everyone
-  // else just closes the modal and stays on the page they were on.
-  const handleGoogleSuccess = async (isNewUser: boolean) => {
-    await refreshSession(true);
+  // Mirror the login/signup pages: refresh the session, then push users without
+  // an active subscription to pricing. Subscribers just close the modal and stay
+  // on the page they were on.
+  const handleGoogleSuccess = async () => {
+    const [, subscribed] = await Promise.all([
+      refreshSession(true),
+      hasActiveSubscription(),
+    ]);
     close();
-    if (consumeNewUserWelcome(isNewUser)) {
-      navigate("/welcome");
+    if (!subscribed) {
+      navigate("/pricing");
     }
   };
 

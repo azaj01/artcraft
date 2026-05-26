@@ -15,7 +15,8 @@ import {
   getReferralUsername,
   getReferrer,
 } from "@storyteller/common";
-import { consumeNewUserWelcome, refreshSession } from "../../lib/session";
+import { refreshSession } from "../../lib/session";
+import { hasActiveSubscription } from "../../lib/billing";
 import { GoogleLoginButton } from "./GoogleLoginButton";
 
 interface SignupFormProps {
@@ -85,16 +86,14 @@ export const SignupForm = ({
     }
   };
 
-  const handleGoogleSuccess = async (isNewUser: boolean) => {
-    // Refresh so the session reflects the new cookie, then route accordingly.
-    // Brand-new accounts see the welcome page once (mirrors the signup flow);
-    // returning users go home.
-    await refreshSession(true);
-    if (consumeNewUserWelcome(isNewUser)) {
-      navigate("/welcome");
-    } else {
-      navigate("/");
-    }
+  const handleGoogleSuccess = async () => {
+    // Refresh the session and check the subscription in parallel; users without
+    // an active subscription are pushed to pricing, subscribers go home.
+    const [, subscribed] = await Promise.all([
+      refreshSession(true),
+      hasActiveSubscription(),
+    ]);
+    navigate(subscribed ? "/" : "/pricing");
   };
 
   const handleGoogleError = (message: string) => {
