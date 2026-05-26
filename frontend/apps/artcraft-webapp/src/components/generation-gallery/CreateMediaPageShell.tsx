@@ -1,6 +1,7 @@
 import { type ReactNode } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinnerThird } from "@fortawesome/pro-solid-svg-icons";
+import { isMobile } from "react-device-detect";
 import { type PopoverItem } from "@storyteller/ui-popover";
 import { TruchetPattern } from "@storyteller/ui-vfx";
 import Seo from "../../components/seo";
@@ -61,13 +62,17 @@ export function CreateMediaPageShell({
     <div className="flex h-full w-full bg-[#101014] text-white">
       <Seo title={title} description={description} />
 
-      {/* Decorative background, empty state only. Hidden on mobile: the glow
-          orbs use filter: blur(120px) and the truchet uses mask-image, both of
-          which are full-screen GPU layers that iOS Safari must re-rasterize
-          when an overlay (mobile menu, modal) composites over them, causing
-          multi-second hangs. (This is distinct from backdrop-filter.) */}
-      {!hasContent && (
-        <div className="hidden sm:block">
+      {/* Decorative background, empty state only. Not rendered on mobile
+          devices: the glow orbs use filter: blur(120px) and the truchet uses
+          mask-image, both of which are full-screen GPU layers that iOS Safari
+          must re-rasterize when an overlay (mobile menu, modal) composites over
+          them, causing multi-second hangs. (This is distinct from
+          backdrop-filter.) We gate on the actual device (react-device-detect's
+          user-agent check) rather than a viewport breakpoint so the layers
+          never mount on a real phone/tablet, and a narrow desktop window still
+          gets the decoration. */}
+      {!hasContent && !isMobile && (
+        <>
           {glowOrbs ?? (
             <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
               <div className="absolute left-1/2 top-[-10%] h-[700px] w-[700px] -translate-x-1/2 rounded-full bg-gradient-to-br from-blue-700 via-blue-500 to-[#00AABA] opacity-[0.12] blur-[120px] transform-gpu" />
@@ -90,7 +95,7 @@ export function CreateMediaPageShell({
               className="absolute inset-0 h-full w-full"
             />
           </div>
-        </div>
+        </>
       )}
 
       <div className="relative z-[1] h-full w-full">
