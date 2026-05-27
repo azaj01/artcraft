@@ -2,6 +2,7 @@ import { memo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleExclamation, faXmark } from "@fortawesome/pro-solid-svg-icons";
 import { getModelCreatorIconPath } from "../../lib/omni-gen-hooks";
+import { CopyPromptButton } from "./CopyPromptButton";
 import type { FailedCardProps } from "./FailedCard";
 
 export const FailedRow = memo(function FailedRow({
@@ -18,18 +19,21 @@ export const FailedRow = memo(function FailedRow({
   return (
     <div className="flex items-center gap-3 rounded-lg px-2.5 py-2">
       {/* Error thumbnail */}
-      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md bg-red-500/10 leading-none">
+      <div className="flex size-[100px] shrink-0 items-center justify-center rounded-md bg-red-500/10 leading-none">
         <FontAwesomeIcon
           icon={faCircleExclamation}
-          className="text-lg text-red-400"
+          className="text-2xl text-red-400"
         />
       </div>
 
       {/* Reason + prompt + model */}
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-red-400">
-          {failureReason || "Generation failed"}
-        </p>
+        <div className="flex items-start gap-2">
+          <p className="min-w-0 flex-1 truncate text-sm font-medium text-red-400">
+            {failureReason || "Generation failed"}
+          </p>
+          {prompt && <CopyPromptButton text={prompt} />}
+        </div>
         {prompt && (
           <p className="mt-0.5 truncate text-xs text-white/45">{prompt}</p>
         )}
