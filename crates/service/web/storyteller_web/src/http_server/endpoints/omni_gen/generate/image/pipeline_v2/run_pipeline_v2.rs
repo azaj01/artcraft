@@ -3,7 +3,7 @@ use log::{info, warn};
 use artcraft_router::api::image_list_ref::ImageListRef;
 use artcraft_router::api::provider::Provider;
 use artcraft_router::client::router_client::RouterClient;
-use artcraft_router::client::router_fal_webhook_optional_client::RouterFalWebhookOptionalClient;
+use artcraft_router::client::router_fal_client::RouterFalClient;
 use artcraft_router::generate::generate_image::generate_image_request_builder::GenerateImageRequestBuilder;
 use artcraft_router::generate::generate_image::generate_image_response::GenerateImageResponse;
 use artcraft_router::generate::generate_image_v2::image_generation_draft_context::ImageGenerationDraftContext;
@@ -24,12 +24,6 @@ pub struct RunPipelineV2Args<'a> {
   pub mysql_connection: &'a mut sqlx::pool::PoolConnection<sqlx::MySql>,
   pub user_token: &'a UserToken,
   pub resolved_media: &'a MediaFilesAsCdnUrlListAndMap,
-}
-
-pub fn should_use_pipeline_v2(router_builder: &GenerateImageRequestBuilder) -> bool {
-  let mut execution_builder = router_builder.clone();
-  execution_builder.provider = Provider::Fal;
-  execution_builder.use_new_builder()
 }
 
 pub async fn run_pipeline_v2(
@@ -106,31 +100,20 @@ fn apply_hydrated_media_inputs(
 fn estimate_cost_in_credits(
   router_builder: &GenerateImageRequestBuilder,
 ) -> Result<u64, CommonWebError> {
-  // TODO(bt,2026-05-15): This might not be 1:1 with new Fal costs, eg. Gpt-image-2
   let mut cost_builder = router_builder.clone();
   cost_builder.provider = Provider::Artcraft;
 
-  // Attempt pipeline_v2 cost
-  match cost_builder.clone().build2() {
-    Err(err) => {
-      warn!("Failed to build image cost plan for v2 pipeline: {}", err);
-    },
-    Ok(request) => {
-      let cost_plan = request.estimate_cost().map_err(|e| {
-        warn!("Failed to build image cost plan for v2 pipeline: {}", e);
-        CommonWebError::from_error(e)
-      })?;
-      return Ok(cost_plan.cost_in_credits.unwrap_or(0));
-    },
-  }
-  
-  // Fall back to pipeline_v1 cost
-  let cost_plan = cost_builder.build().map_err(|e| {
-    warn!("Failed to build image cost plan for v1 pipeline: {}", e);
+  let request = cost_builder.build2().map_err(|e| {
+    warn!("Failed to build image cost request: {}", e);
     CommonWebError::from_error(e)
   })?;
 
-  Ok(cost_plan.estimate_costs().cost_in_credits.unwrap_or(0))
+  let cost = request.estimate_cost().map_err(|e| {
+    warn!("Failed to estimate image cost: {}", e);
+    CommonWebError::from_error(e)
+  })?;
+
+  Ok(cost.cost_in_credits.unwrap_or(0))
 }
 
 async fn finalize_and_generate(
@@ -172,11 +155,11 @@ fn build_router_client(
 ) -> Result<RouterClient, CommonWebError> {
   match provider {
     Provider::Fal => {
-      let fal_client = RouterFalWebhookOptionalClient::new_with_webhook(
+      let fal_client = RouterFalClient::new_with_webhook(
         server_state.fal.api_key.clone(),
         server_state.fal.webhook_url.clone(),
       );
-      Ok(RouterClient::FalWebhookOptional(fal_client))
+      Ok(RouterClient::Fal(fal_client))
     },
     other => {
       Err(CommonWebError::server_error_with_message(

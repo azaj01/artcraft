@@ -30,7 +30,7 @@ pub fn build_fal_flux_2_lora_angles(
   let request = EnqueueFlux2LoraEditImageAngleRequest {
     image_urls,
     horizontal_angle: builder.horizontal_angle,
-    vertical_angle: builder.vertical_angle,
+    vertical_angle: builder.vertical_angle.map(|v| v.clamp(0.0, 60.0)),
     zoom: builder.zoom,
     num_images: Some(num_images),
     image_size,
@@ -148,10 +148,36 @@ mod tests {
 
   #[test]
   fn passes_through_camera_params() {
-    let req = unwrap_request(build_fal_flux_2_lora_angles(base()));
+    let builder = GenerateImageRequestBuilder {
+      vertical_angle: Some(15.0),
+      ..base()
+    };
+    let req = unwrap_request(build_fal_flux_2_lora_angles(builder));
     assert_eq!(req.horizontal_angle, Some(45.0));
-    assert_eq!(req.vertical_angle, Some(-15.0));
+    assert_eq!(req.vertical_angle, Some(15.0));
     assert_eq!(req.zoom, Some(2.0));
+  }
+
+  #[test]
+  fn negative_vertical_angle_clamps_to_zero() {
+    // Fal's flux-2-lora-gallery rejects vertical_angle < 0 (schema requires ge: 0.0).
+    let builder = GenerateImageRequestBuilder {
+      vertical_angle: Some(-30.0),
+      ..base()
+    };
+    let req = unwrap_request(build_fal_flux_2_lora_angles(builder));
+    assert_eq!(req.vertical_angle, Some(0.0));
+  }
+
+  #[test]
+  fn vertical_angle_above_sixty_clamps_to_sixty() {
+    // Fal's flux-2-lora-gallery rejects vertical_angle > 60 (schema requires le: 60.0).
+    let builder = GenerateImageRequestBuilder {
+      vertical_angle: Some(90.0),
+      ..base()
+    };
+    let req = unwrap_request(build_fal_flux_2_lora_angles(builder));
+    assert_eq!(req.vertical_angle, Some(60.0));
   }
 
   #[test]
