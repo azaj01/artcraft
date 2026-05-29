@@ -448,7 +448,7 @@ export default function CreateImage() {
                   onSelect={handleModelChange}
                   mode="toggle"
                   panelTitle="Select Model"
-                  panelClassName="w-80"
+                  panelClassName="w-[360px]"
                   richList
                   triggerIcon={
                     <img
