@@ -7,7 +7,7 @@ use crate::http_server::common_responses::common_web_error::CommonWebError;
 /// the upstream API. Reject the request at the handler layer so callers see
 /// a clean 400 with an actionable message and we don't charge their wallet
 /// for an inference job we know will fail.
-pub fn validate_image_required(
+pub (super) fn validate_when_image_required(
   request: &OmniGenVideoCostAndGenerateRequest,
 ) -> Result<(), CommonWebError> {
   match request.model {
@@ -22,6 +22,7 @@ pub fn validate_image_required(
   }
 
   let has_start_frame = request.start_frame_image_media_token.is_some();
+  
   let has_reference_images = request
     .reference_image_media_tokens
     .as_ref()
@@ -69,7 +70,7 @@ mod tests {
   #[test]
   fn passes_when_model_is_none() {
     let req = base_request();
-    assert!(validate_image_required(&req).is_ok());
+    assert!(validate_when_image_required(&req).is_ok());
   }
 
   #[test]
@@ -79,7 +80,7 @@ mod tests {
       model: Some(CommonVideoModel::Seedance2p0),
       ..base_request()
     };
-    assert!(validate_image_required(&req).is_ok());
+    assert!(validate_when_image_required(&req).is_ok());
   }
 
   #[test]
@@ -88,7 +89,7 @@ mod tests {
       model: Some(CommonVideoModel::GrokImagineVideo1p5),
       ..base_request()
     };
-    let err = validate_image_required(&req).expect_err("should reject");
+    let err = validate_when_image_required(&req).expect_err("should reject");
     match err {
       CommonWebError::BadInputWithSimpleMessage(msg) => {
         assert_eq!(msg, "Image is required");
@@ -105,7 +106,7 @@ mod tests {
       ..base_request()
     };
     assert!(matches!(
-      validate_image_required(&req),
+      validate_when_image_required(&req),
       Err(CommonWebError::BadInputWithSimpleMessage(_))
     ));
   }
@@ -117,7 +118,7 @@ mod tests {
       start_frame_image_media_token: Some(token("mf_start")),
       ..base_request()
     };
-    assert!(validate_image_required(&req).is_ok());
+    assert!(validate_when_image_required(&req).is_ok());
   }
 
   #[test]
@@ -127,7 +128,7 @@ mod tests {
       reference_image_media_tokens: Some(vec![token("mf_a"), token("mf_b")]),
       ..base_request()
     };
-    assert!(validate_image_required(&req).is_ok());
+    assert!(validate_when_image_required(&req).is_ok());
   }
 
   #[test]
@@ -138,7 +139,7 @@ mod tests {
       reference_image_media_tokens: Some(vec![token("mf_a")]),
       ..base_request()
     };
-    assert!(validate_image_required(&req).is_ok());
+    assert!(validate_when_image_required(&req).is_ok());
   }
 
   #[test]
@@ -151,6 +152,6 @@ mod tests {
       end_frame_image_media_token: Some(token("mf_end")),
       ..base_request()
     };
-    assert!(validate_image_required(&req).is_err());
+    assert!(validate_when_image_required(&req).is_err());
   }
 }

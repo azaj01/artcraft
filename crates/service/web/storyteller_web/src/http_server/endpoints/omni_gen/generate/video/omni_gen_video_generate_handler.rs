@@ -32,15 +32,15 @@ use tokens::tokens::non_unique::debug_logs_event_token::DebugLogEventToken;
 use crate::http_server::common_responses::common_web_error::CommonWebError;
 use crate::http_server::endpoints::generate::common::payments_error_test::payments_error_test;
 use crate::http_server::endpoints::omni_gen::generate::video::helpers::hydrate_router_request::hydrate_to_router_request;
-use crate::http_server::endpoints::omni_gen::generate::video::helpers::validate_image_required::validate_image_required;
+use crate::http_server::endpoints::omni_gen::generate::video::helpers::resolve_kinovi_character_ids::resolve_kinovi_character_ids;
 use crate::http_server::endpoints::omni_gen::generate::video::insert_db_job::insert_fal_job::{insert_fal_job, InsertFalJobArgs};
 use crate::http_server::endpoints::omni_gen::generate::video::insert_db_job::insert_gmicloud_job::{insert_gmicloud_job, InsertGmiCloudJobArgs};
 use crate::http_server::endpoints::omni_gen::generate::video::insert_db_job::insert_grok_api_job::{insert_grok_api_job, InsertGrokApiJobArgs};
 use crate::http_server::endpoints::omni_gen::generate::video::insert_db_job::insert_seedance2pro_jobs::{insert_seedance2pro_jobs, InsertSeedance2proJobsArgs};
 use crate::http_server::endpoints::omni_gen::generate::video::insert_db_job::shared_job_args::SharedJobArgs;
-use crate::http_server::endpoints::omni_gen::generate::video::pipeline_v2::run_pipeline_v2::{run_pipeline_v2, RunPipelineV2Args};
-use crate::http_server::endpoints::omni_gen::generate::video::helpers::resolve_kinovi_character_ids::resolve_kinovi_character_ids;
 use crate::http_server::endpoints::omni_gen::generate::video::kinovi_account::KinoviAccount;
+use crate::http_server::endpoints::omni_gen::generate::video::pipeline_v2::run_pipeline_v2::{run_pipeline_v2, RunPipelineV2Args};
+use crate::http_server::endpoints::omni_gen::shared_utils::video::validate_video_request::validate_video_request;
 use crate::http_server::session::lookup::user_session_feature_flags::UserSessionFeatureFlags;
 use crate::http_server::validations::validate_idempotency_token_format::validate_idempotency_token_format;
 use crate::state::server_state::ServerState;
@@ -70,7 +70,7 @@ pub async fn omni_gen_video_generate_handler(
 
   // Reject doomed combos (e.g. grok_imagine_video_1p5 without an image)
   // before any billable or DB-mutating work — see helper for the rules.
-  validate_image_required(&request)?;
+  validate_video_request(&request)?;
 
   payments_error_test(&request.prompt.as_deref().unwrap_or(""))?;
 
