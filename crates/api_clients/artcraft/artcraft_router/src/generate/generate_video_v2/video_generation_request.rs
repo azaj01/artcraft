@@ -5,6 +5,8 @@ use crate::generate::generate_video::generate_video_response::GenerateVideoRespo
 use crate::generate::generate_video::video_generation_cost_estimate::VideoGenerationCostEstimate;
 use crate::generate::generate_video_v2::providers::artcraft::grok_imagine_video::cost::ArtcraftGrokImagineVideoCostState;
 use crate::generate::generate_video_v2::providers::artcraft::grok_imagine_video::request::ArtcraftGrokImagineVideoRequestState;
+use crate::generate::generate_video_v2::providers::artcraft::grok_imagine_video_1p5::cost::ArtcraftGrokImagineVideo1p5CostState;
+use crate::generate::generate_video_v2::providers::artcraft::grok_imagine_video_1p5::request::ArtcraftGrokImagineVideo1p5RequestState;
 use crate::generate::generate_video_v2::providers::artcraft::happy_horse_1p0::cost::ArtcraftHappyHorse1p0CostState;
 use crate::generate::generate_video_v2::providers::artcraft::happy_horse_1p0::request::ArtcraftHappyHorse1p0RequestState;
 use crate::generate::generate_video_v2::providers::artcraft::kling_1_6_pro::cost::ArtcraftKling16ProCostState;
@@ -97,6 +99,8 @@ use crate::generate::generate_video_v2::providers::gmicloud::seedance_2p0_fast_g
 use crate::generate::generate_video_v2::providers::gmicloud::seedance_2p0_fast_g::request::GmiCloudSeedance2p0UltraFastRequestState;
 use crate::generate::generate_video_v2::providers::grok_api::grok_imagine_video::cost::GrokApiGrokImagineVideoCostState;
 use crate::generate::generate_video_v2::providers::grok_api::grok_imagine_video::request::GrokApiGrokImagineVideoRequestState;
+use crate::generate::generate_video_v2::providers::grok_api::grok_imagine_video_1p5::cost::GrokApiGrokImagineVideo1p5CostState;
+use crate::generate::generate_video_v2::providers::grok_api::grok_imagine_video_1p5::request::GrokApiGrokImagineVideo1p5RequestState;
 use crate::generate::generate_video_v2::providers::kinovi::happy_horse_1p0::cost::KinoviHappyHorse1p0CostState;
 use crate::generate::generate_video_v2::providers::kinovi::happy_horse_1p0::request::KinoviHappyHorse1p0RequestState;
 use crate::generate::generate_video_v2::providers::kinovi::seedance_2p0::cost::KinoviSeedance2p0CostState;
@@ -107,6 +111,7 @@ use crate::generate::generate_video_v2::providers::kinovi::seedance_2p0_fast::re
 #[derive(Clone, Debug)]
 pub enum VideoGenerationRequest {
   ArtcraftGrokImagineVideo(ArtcraftGrokImagineVideoRequestState),
+  ArtcraftGrokImagineVideo1p5(ArtcraftGrokImagineVideo1p5RequestState),
   ArtcraftHappyHorse1p0(ArtcraftHappyHorse1p0RequestState),
   ArtcraftKling16Pro(ArtcraftKling16ProRequestState),
   ArtcraftKling21Master(ArtcraftKling21MasterRequestState),
@@ -153,6 +158,7 @@ pub enum VideoGenerationRequest {
   GmiCloudSeedance2p0Ultra(GmiCloudSeedance2p0UltraRequestState),
   GmiCloudSeedance2p0UltraFast(GmiCloudSeedance2p0UltraFastRequestState),
   GrokApiGrokImagineVideo(GrokApiGrokImagineVideoRequestState),
+  GrokApiGrokImagineVideo1p5(GrokApiGrokImagineVideo1p5RequestState),
   KinoviHappyHorse1p0(KinoviHappyHorse1p0RequestState),
   KinoviSeedance2p0(KinoviSeedance2p0RequestState),
   KinoviSeedance2p0Fast(KinoviSeedance2p0FastRequestState),
@@ -163,6 +169,7 @@ impl VideoGenerationRequest {
   pub fn get_provider(&self) -> RouterProvider {
     match self {
       Self::ArtcraftGrokImagineVideo(_) => RouterProvider::Artcraft,
+      Self::ArtcraftGrokImagineVideo1p5(_) => RouterProvider::Artcraft,
       Self::ArtcraftHappyHorse1p0(_) => RouterProvider::Artcraft,
       Self::ArtcraftKling16Pro(_) => RouterProvider::Artcraft,
       Self::ArtcraftKling21Master(_) => RouterProvider::Artcraft,
@@ -209,6 +216,7 @@ impl VideoGenerationRequest {
       Self::GmiCloudSeedance2p0Ultra(_) => RouterProvider::GmiCloud,
       Self::GmiCloudSeedance2p0UltraFast(_) => RouterProvider::GmiCloud,
       Self::GrokApiGrokImagineVideo(_) => RouterProvider::GrokApi,
+      Self::GrokApiGrokImagineVideo1p5(_) => RouterProvider::GrokApi,
       Self::KinoviHappyHorse1p0(_) => RouterProvider::Seedance2Pro,
       Self::KinoviSeedance2p0(_) => RouterProvider::Seedance2Pro,
       Self::KinoviSeedance2p0Fast(_) => RouterProvider::Seedance2Pro,
@@ -219,6 +227,7 @@ impl VideoGenerationRequest {
   pub fn estimate_cost(&self) -> Result<VideoGenerationCostEstimate, ArtcraftRouterError> {
     match self {
       VideoGenerationRequest::ArtcraftGrokImagineVideo(request) => Ok(ArtcraftGrokImagineVideoCostState::from_request(request).estimate_cost()),
+      VideoGenerationRequest::ArtcraftGrokImagineVideo1p5(request) => Ok(ArtcraftGrokImagineVideo1p5CostState::from_request(request).estimate_cost()),
       VideoGenerationRequest::ArtcraftHappyHorse1p0(request) => Ok(ArtcraftHappyHorse1p0CostState::from_request(request).estimate_cost()),
       VideoGenerationRequest::ArtcraftKling16Pro(request) => Ok(ArtcraftKling16ProCostState::from_request(request).estimate_cost()),
       VideoGenerationRequest::ArtcraftKling21Master(request) => Ok(ArtcraftKling21MasterCostState::from_request(request).estimate_cost()),
@@ -265,6 +274,7 @@ impl VideoGenerationRequest {
       VideoGenerationRequest::GmiCloudSeedance2p0Ultra(request) => Ok(GmiCloudSeedance2p0UltraCostState::from_request(request).estimate_cost()),
       VideoGenerationRequest::GmiCloudSeedance2p0UltraFast(request) => Ok(GmiCloudSeedance2p0UltraFastCostState::from_request(request).estimate_cost()),
       VideoGenerationRequest::GrokApiGrokImagineVideo(request) => Ok(GrokApiGrokImagineVideoCostState::from_request(request).estimate_cost()),
+      VideoGenerationRequest::GrokApiGrokImagineVideo1p5(request) => Ok(GrokApiGrokImagineVideo1p5CostState::from_request(request).estimate_cost()),
       VideoGenerationRequest::KinoviHappyHorse1p0(request) => Ok(KinoviHappyHorse1p0CostState::from_request(request).estimate_cost()),
       VideoGenerationRequest::KinoviSeedance2p0(request) => Ok(KinoviSeedance2p0CostState::from_request(request).estimate_cost()),
       VideoGenerationRequest::KinoviSeedance2p0Fast(request) => Ok(KinoviSeedance2p0FastCostState::from_request(request).estimate_cost()),
@@ -276,6 +286,10 @@ impl VideoGenerationRequest {
   pub async fn send_request(&self, client: &RouterClient) -> Result<GenerateVideoResponse, ArtcraftRouterError> {
     match self {
       VideoGenerationRequest::ArtcraftGrokImagineVideo(request) => {
+        let client_ref = client.get_artcraft_client_ref()?;
+        request.send(client_ref).await
+      },
+      VideoGenerationRequest::ArtcraftGrokImagineVideo1p5(request) => {
         let client_ref = client.get_artcraft_client_ref()?;
         request.send(client_ref).await
       },
@@ -460,6 +474,10 @@ impl VideoGenerationRequest {
         request.send(client_ref).await
       },
       VideoGenerationRequest::GrokApiGrokImagineVideo(request) => {
+        let client_ref = client.get_grok_api_client_ref()?;
+        request.send(client_ref).await
+      },
+      VideoGenerationRequest::GrokApiGrokImagineVideo1p5(request) => {
         let client_ref = client.get_grok_api_client_ref()?;
         request.send(client_ref).await
       },

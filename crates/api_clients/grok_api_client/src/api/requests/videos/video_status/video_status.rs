@@ -170,6 +170,21 @@ mod tests {
   }
 
   #[test]
+  fn pending_response_with_v1p5_model_passes_model_string_through() {
+    // The `model` field is opaque Option<String>; the v1.5 preview model
+    // identifier (and its dated alias) flow through unchanged.
+    let json = r#"{ "status": "pending", "progress": 5, "model": "grok-imagine-video-1.5-preview" }"#;
+    let parsed: VideoStatusResponseBody = serde_json::from_str(json).unwrap();
+    let result = classify_status_field(&parsed).unwrap();
+    assert_eq!(result.model.as_deref(), Some("grok-imagine-video-1.5-preview"));
+
+    let json_alias = r#"{ "status": "pending", "progress": 5, "model": "grok-imagine-video-1.5-2026-05-30" }"#;
+    let parsed_alias: VideoStatusResponseBody = serde_json::from_str(json_alias).unwrap();
+    let result_alias = classify_status_field(&parsed_alias).unwrap();
+    assert_eq!(result_alias.model.as_deref(), Some("grok-imagine-video-1.5-2026-05-30"));
+  }
+
+  #[test]
   fn done_response_classifies_as_done_with_video() {
     let json = r#"{
       "status": "done",
@@ -291,7 +306,8 @@ mod tests {
     let result = video_status(VideoStatusArgs {
       api_key: &api_key,
       request: VideoStatusRequest {
-        request_id: "e397ac83-c22f-90b1-9831-900c01497345".to_string(),
+        //request_id: "e397ac83-c22f-90b1-9831-900c01497345".to_string(),
+        request_id: "ce681bd0-133d-9cf3-975c-422d292d4e8e".to_string(),
       },
     }).await;
 
