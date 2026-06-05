@@ -33,7 +33,8 @@ export type AppId =
   | "REMOVE_BACKGROUND"
   | "ANGLES"
   | "STORYBOARD"
-  | "BACKGROUND_CHANGE";
+  | "BACKGROUND_CHANGE"
+  | "VIDEO_EDITOR";
 
 export interface AppDescriptor {
   id: AppId;
@@ -79,7 +80,7 @@ export interface FullAppItem {
   description: string;
   icon: IconDefinition;
   category: "generate" | "edit";
-  badge?: "NEW" | "BEST" | "SOON";
+  badge?: "NEW" | "BEST" | "SOON" | "BETA";
   action?: AppId;
   color?: string;
 }
@@ -198,6 +199,16 @@ export const ALL_APPS: FullAppItem[] = [
     badge: "NEW",
   },
   {
+    id: "video-editor",
+    label: "Video Editor",
+    description: "Edit and assemble videos on a timeline",
+    icon: faFilm,
+    category: "edit",
+    action: "VIDEO_EDITOR",
+    color: "bg-teal-500/40",
+    badge: "BETA",
+  },
+  {
     id: "2d-canvas",
     label: "Image Editor",
     description: "Easy edits. Great for graphic design.",
@@ -259,7 +270,9 @@ export const getBadgeStyles = (badge?: string) => {
     case "BEST":
       return "bg-primary text-white";
     case "SOON":
-      return "bg-ui-controls text-base-fg";
+      return "bg-gray-600 text-white";
+    case "BETA":
+      return "bg-amber-500 text-white";
     default:
       return "";
   }
@@ -282,6 +295,7 @@ export const goToApp = (action?: string) => {
       "ANGLES",
       "STORYBOARD",
       "BACKGROUND_CHANGE",
+      "VIDEO_EDITOR",
     ].includes(action)
   ) {
     if (action === "STORYBOARD") {
