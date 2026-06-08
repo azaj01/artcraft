@@ -3,6 +3,9 @@
   "include": [],
   "references": [
     {
+      "path": "../../libs/components/video-editor"
+    },
+    {
       "path": "../../libs/components/pricing-table"
     },
     {
@@ -10,9 +13,6 @@
     },
     {
       "path": "../../libs/components/slider-v2"
-    },
-    {
-      "path": "../../libs/components/vfx"
     },
     {
       "path": "../../libs/components/gallery-modal"
@@ -51,10 +51,13 @@
       "path": "../../libs/components/loading-spinner"
     },
     {
-      "path": "../../libs/components/tooltip"
+      "path": "../../libs/components/tab-selector"
     },
     {
       "path": "../../libs/components/popover"
+    },
+    {
+      "path": "../../libs/components/tooltip"
     },
     {
       "path": "../../libs/components/modal"
@@ -64,6 +67,9 @@
     },
     {
       "path": "../../libs/components/button"
+    },
+    {
+      "path": "../../libs/components/vfx"
     },
     {
       "path": "../../libs/common"

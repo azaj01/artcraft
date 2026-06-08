@@ -16,6 +16,7 @@ import CreateImage from "../pages/create-image";
 import CreateVideo from "../pages/create-video";
 import CreateVFX from "../pages/create-vfx";
 import PageScene from "../pages/pagescene";
+import VideoEditorPage from "../pages/video-editor";
 import Pricing from "../pages/pricing";
 import Support from "../pages/support/support";
 import Login from "../pages/login";
@@ -87,13 +88,17 @@ function ProtectedContent() {
       ? "var(--sidebar-width)"
       : "calc(var(--sidebar-width-icon) + 1.5rem)";
 
-  // The Edit 3D editor hosts the header's actions (pricing/credits/task
-  // queue/profile) inside its own canvas toolbar to reclaim vertical
-  // space, so the global header is hidden there — desktop only, since the
-  // mobile route shows a gate that still needs the header's nav chrome.
+  // The Edit 3D and video editors host the header's actions
+  // (pricing/credits/task queue/profile) inside their own toolbar/header to
+  // reclaim vertical space, so the global header is hidden there — desktop
+  // only, since the mobile route shows a gate that still needs the header's
+  // nav chrome.
   const hideTopBar =
     !isMobile &&
-    (pathname === "/edit-3d" || pathname.startsWith("/edit-3d/"));
+    (pathname === "/edit-3d" ||
+      pathname.startsWith("/edit-3d/") ||
+      pathname === "/video-editor" ||
+      pathname.startsWith("/video-editor/"));
 
   return (
     <div
@@ -143,6 +148,8 @@ export function App() {
           <Route path="/background-change" element={<CreateVFX />} />
           <Route path="/edit-3d" element={<PageScene />} />
           <Route path="/edit-3d/:sceneToken" element={<PageScene />} />
+          <Route path="/video-editor" element={<VideoEditorPage />} />
+          <Route path="/video-editor/:projectId" element={<VideoEditorPage />} />
           <Route path="/support" element={<Support />} />
           <Route path="/pricing" element={<Pricing />} />
           {/* Welcome is public so it stays reachable right after signup
