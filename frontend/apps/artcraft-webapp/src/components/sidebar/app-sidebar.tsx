@@ -8,7 +8,6 @@ import {
   faCube,
   faFilm,
   faWandMagicSparkles,
-  faGrid2,
   faGraduationCap,
   faNewspaper,
   faCircleQuestion,
@@ -36,6 +35,7 @@ import {
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { MARKETING_SITE, SOCIAL_LINKS } from "../../config/links";
 import { useSceneCacheStore } from "../../pages/pagescene/scene-cache-store";
+import { LibraryFoldersNav } from "./library-folders-nav";
 
 type NavItem = {
   label: string;
@@ -78,10 +78,6 @@ function useCreateItems(): NavItem[] {
     [lastSceneToken],
   );
 }
-
-const ASSETS_ITEMS: NavItem[] = [
-  { label: "Library", href: "/library", icon: faGrid2 },
-];
 
 const REFERRALS_ITEM: NavItem = {
   label: "Referrals",
@@ -142,9 +138,9 @@ function NavMenuItem({
   const inner = (
     <>
       <FontAwesomeIcon icon={item.icon} />
-      <span>{item.label}</span>
+      <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
       {item.badge && (
-        <span className="ml-auto rounded-sm bg-amber-500 px-1.5 py-0.5 text-[9px] font-semibold uppercase leading-none text-white group-data-[collapsible=icon]:hidden">
+        <span className="ml-auto bg-amber-600 px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none text-white group-data-[collapsible=icon]:hidden rounded-full">
           {item.badge}
         </span>
       )}
@@ -257,12 +253,7 @@ export function AppSidebar() {
           pathname={pathname}
           onClick={handleNavClick}
         />
-        <NavSection
-          label="Assets"
-          items={ASSETS_ITEMS}
-          pathname={pathname}
-          onClick={handleNavClick}
-        />
+        <LibraryFoldersNav pathname={pathname} onNavClick={handleNavClick} />
         {hasReferralsFlag && (
           <NavSection
             label="Invite"
