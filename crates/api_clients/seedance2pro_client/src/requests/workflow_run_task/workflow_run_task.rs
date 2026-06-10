@@ -1,8 +1,8 @@
 use crate::creds::seedance2pro_session::Seedance2ProSession;
+use crate::error::seedance2pro_bad_request_api_error::Seedance2ProBadRequestApiError;
 use crate::error::seedance2pro_client_error::Seedance2ProClientError;
 use crate::error::seedance2pro_error::Seedance2ProError;
 use crate::error::seedance2pro_generic_api_error::Seedance2ProGenericApiError;
-use crate::error::seedance2pro_specific_api_error::Seedance2ProSpecificApiError;
 use crate::requests::workflow_run_task::request_types::*;
 use crate::requests::kinovi_host::{KinoviHost, resolve_host};
 use crate::utils::categorize_seedance2pro_error::categorize_seedance2pro_error;
@@ -415,15 +415,16 @@ pub async fn workflow_run_task(args: WorkflowRunTaskArgs<'_>) -> Result<Workflow
   let task_data = batch_response
     .into_iter()
     .next()
-    .ok_or_else(|| Seedance2ProGenericApiError::UncategorizedBadResponse(
-      "Empty batch response array".to_string()
-    ))?
+    .ok_or_else(|| Seedance2ProGenericApiError::UnexpectedResponseShape {
+      explanation: "Empty batch response array".to_string(),
+      raw_body: response_body.clone(),
+    })?
     .result
     .data
     .json;
 
   if task_data.violation_warning {
-    return Err(Seedance2ProSpecificApiError::VideoGenerationViolation(response_body).into());
+    return Err(Seedance2ProBadRequestApiError::VideoGenerationViolation { raw_body: response_body }.into());
   }
 
   Ok(WorkflowRunTaskResponse {
