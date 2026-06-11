@@ -1143,9 +1143,7 @@ export default function CreateVideo() {
                 icon={faWaveformLines}
                 activeIcon={faWaveformLines}
                 label={generateWithSound ? "On" : "Off"}
-                onClick={() =>
-                  setUi({ generateWithSound: !generateWithSound })
-                }
+                onClick={() => setUi({ generateWithSound: !generateWithSound })}
               />
             </div>
           )}

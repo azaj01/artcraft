@@ -1281,37 +1281,40 @@ export const GalleryModal = React.memo(
       [folders, closeFolderMenus],
     );
 
-    const handleConfirmRename = useCallback(async (nameArg?: unknown) => {
-      if (!renamingFolderId) return;
-      // `nameArg` is a string from the rename dialog; the inline header rename's
-      // onBlur passes a focus event, so fall back to `renameValue` for non-strings.
-      const trimmed = (
-        typeof nameArg === "string" ? nameArg : renameValue
-      ).trim();
-      if (!trimmed) return;
-      const folderId = renamingFolderId;
-      // Optimistic — the rename feels instant; reconcile on error.
-      setFolders((prev) =>
-        prev.map((f) => (f.id === folderId ? { ...f, name: trimmed } : f)),
-      );
-      setRenamingFolderId(null);
-      setRenameViaModal(false);
-      try {
-        const res = await foldersApi.RenameFolder({
-          folderToken: folderId,
-          newName: trimmed,
-        });
-        if (!res.success) {
-          toast.error(res.errorMessage || "Failed to rename folder.");
+    const handleConfirmRename = useCallback(
+      async (nameArg?: unknown) => {
+        if (!renamingFolderId) return;
+        // `nameArg` is a string from the rename dialog; the inline header rename's
+        // onBlur passes a focus event, so fall back to `renameValue` for non-strings.
+        const trimmed = (
+          typeof nameArg === "string" ? nameArg : renameValue
+        ).trim();
+        if (!trimmed) return;
+        const folderId = renamingFolderId;
+        // Optimistic — the rename feels instant; reconcile on error.
+        setFolders((prev) =>
+          prev.map((f) => (f.id === folderId ? { ...f, name: trimmed } : f)),
+        );
+        setRenamingFolderId(null);
+        setRenameViaModal(false);
+        try {
+          const res = await foldersApi.RenameFolder({
+            folderToken: folderId,
+            newName: trimmed,
+          });
+          if (!res.success) {
+            toast.error(res.errorMessage || "Failed to rename folder.");
+            loadFolders();
+          }
+        } catch (err) {
+          toast.error(
+            `Failed to rename folder: ${err instanceof Error ? err.message : String(err)}`,
+          );
           loadFolders();
         }
-      } catch (err) {
-        toast.error(
-          `Failed to rename folder: ${err instanceof Error ? err.message : String(err)}`,
-        );
-        loadFolders();
-      }
-    }, [renameValue, renamingFolderId, foldersApi, loadFolders]);
+      },
+      [renameValue, renamingFolderId, foldersApi, loadFolders],
+    );
 
     // Star / unstar a folder (optimistic + reconcile).
     const handleSetFolderStar = useCallback(
@@ -1488,7 +1491,8 @@ export const GalleryModal = React.memo(
             mediaFileTokens: itemIds,
           });
           if (res.success) {
-            const name = folders.find((f) => f.id === folderId)?.name ?? "folder";
+            const name =
+              folders.find((f) => f.id === folderId)?.name ?? "folder";
             toast.success(
               `Added ${itemIds.length} item${itemIds.length === 1 ? "" : "s"} to ${name}`,
             );
@@ -1512,17 +1516,23 @@ export const GalleryModal = React.memo(
         const idSet = new Set(itemIds);
         setFolderMediaItems((prev) => {
           const next = { ...prev };
-          if (next[source]) next[source] = next[source].filter((it) => !idSet.has(it.id));
+          if (next[source])
+            next[source] = next[source].filter((it) => !idSet.has(it.id));
           if (next[target]) {
             const seen = new Set(next[target].map((i) => i.id));
-            next[target] = [...movedItems.filter((i) => !seen.has(i.id)), ...next[target]];
+            next[target] = [
+              ...movedItems.filter((i) => !seen.has(i.id)),
+              ...next[target],
+            ];
           }
           return next;
         });
         bumpFolderCollage(target, movedItems);
         // Drop the moved stills from the source folder's collage.
         const movedUrls = new Set(
-          movedItems.map(galleryItemToCollageUrl).filter((u): u is string => !!u),
+          movedItems
+            .map(galleryItemToCollageUrl)
+            .filter((u): u is string => !!u),
         );
         setFolders((prev) =>
           prev.map((f) =>
@@ -1569,11 +1579,16 @@ export const GalleryModal = React.memo(
         const idSet = new Set(itemIds);
         const removedItems = resolveItems(itemIds);
         const removedUrls = new Set(
-          removedItems.map(galleryItemToCollageUrl).filter((u): u is string => !!u),
+          removedItems
+            .map(galleryItemToCollageUrl)
+            .filter((u): u is string => !!u),
         );
         setFolderMediaItems((prev) =>
           prev[folderId]
-            ? { ...prev, [folderId]: prev[folderId].filter((it) => !idSet.has(it.id)) }
+            ? {
+                ...prev,
+                [folderId]: prev[folderId].filter((it) => !idSet.has(it.id)),
+              }
             : prev,
         );
         setFolders((prev) =>
@@ -1616,7 +1631,8 @@ export const GalleryModal = React.memo(
         if (source && source !== targetFolderId) {
           promptFolderDrop({
             count: itemIds.length,
-            targetFolderName: folders.find((f) => f.id === targetFolderId)?.name,
+            targetFolderName: folders.find((f) => f.id === targetFolderId)
+              ?.name,
             onMove: () => handleMoveMedia(itemIds, source, targetFolderId),
             onAdd: () => handleAddToFolder(itemIds, targetFolderId),
           });
@@ -1861,7 +1877,7 @@ export const GalleryModal = React.memo(
             }
           }}
           className={twMerge(
-            "h-[780px] max-h-[90vh] w-full max-w-5xl rounded-xl",
+            "h-[780px] max-h-[90vh] w-full max-w-5xl rounded-2xl",
             mode === "view" &&
               "h-[780px] min-h-[640px] min-w-[66rem] w-[66rem] max-w-none",
           )}
@@ -1899,19 +1915,21 @@ export const GalleryModal = React.memo(
                       ))}
                     </div>
                   )}
-                  {mode === "view" && galleryTab === "folders" && !activeFolder && (
-                    <button
-                      type="button"
-                      onClick={() => handleOpenNewFolderModal(null)}
-                      className="flex items-center gap-2 rounded-lg bg-ui-controls/60 px-3 py-1.5 text-sm font-medium text-base-fg hover:bg-ui-controls/90 transition-colors relative z-[51]"
-                    >
-                      <FontAwesomeIcon
-                        icon={faFolderPlus}
-                        className="text-xs"
-                      />
-                      New folder
-                    </button>
-                  )}
+                  {mode === "view" &&
+                    galleryTab === "folders" &&
+                    !activeFolder && (
+                      <button
+                        type="button"
+                        onClick={() => handleOpenNewFolderModal(null)}
+                        className="flex items-center gap-2 rounded-lg bg-ui-controls/60 px-3 py-1.5 text-sm font-medium text-base-fg hover:bg-ui-controls/90 transition-colors relative z-[51]"
+                      >
+                        <FontAwesomeIcon
+                          icon={faFolderPlus}
+                          className="text-xs"
+                        />
+                        New folder
+                      </button>
+                    )}
                   {galleryTab === "folders" && activeFolder ? (
                     /* ── Folder header (breadcrumb trail) ── */
                     <div className="flex items-center gap-1.5 relative z-[51] flex-wrap">

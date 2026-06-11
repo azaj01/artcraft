@@ -339,7 +339,7 @@ export const PromptBox = forwardRef<HTMLDivElement, PromptBoxProps>(
 
           <div
             className={twMerge(
-              "glass rounded-xl p-3 sm:p-4 !transition-all duration-200",
+              "glass rounded-2xl p-3 sm:p-4 !transition-all duration-200",
               hasAnyRowAbove && "rounded-t-none border-t-0",
               isFocused && "ring-1 ring-primary",
             )}
@@ -391,7 +391,12 @@ export const PromptBox = forwardRef<HTMLDivElement, PromptBoxProps>(
                     )}
                     colorMap={mentionColorMap}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter" && enterToGenerate && !e.shiftKey && !e.metaKey) {
+                      if (
+                        e.key === "Enter" &&
+                        enterToGenerate &&
+                        !e.shiftKey &&
+                        !e.metaKey
+                      ) {
                         e.preventDefault();
                         onSubmit();
                       }

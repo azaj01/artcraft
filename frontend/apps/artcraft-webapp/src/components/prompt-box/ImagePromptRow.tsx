@@ -242,7 +242,7 @@ export const ImagePromptRow = ({
       <div
         ref={rootRef}
         className={twMerge(
-          "glass flex flex-col sm:flex-row rounded-xl sm:rounded-t-xl sm:rounded-b-none",
+          "glass flex flex-col sm:flex-row rounded-2xl sm:rounded-t-2xl sm:rounded-b-none",
           className,
         )}
         onMouseDown={stopIfInside}
@@ -435,7 +435,10 @@ const AddButton = ({
   if (isMobile) {
     return (
       <>
-        <button onClick={() => setDrawerOpen(true)} className={ADD_BUTTON_CLASS}>
+        <button
+          onClick={() => setDrawerOpen(true)}
+          className={ADD_BUTTON_CLASS}
+        >
           {plus}
         </button>
         <SettingsDrawer

@@ -208,7 +208,10 @@ export const MediaReferenceRow = ({
         onChange={handleAudioUpload}
       />
       <div
-        className={twMerge("glass flex flex-col sm:flex-row", className)}
+        className={twMerge(
+          "glass flex flex-col sm:flex-row rounded-2xl sm:rounded-none",
+          className,
+        )}
         onMouseDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
         onPointerDown={(e) => e.stopPropagation()}

@@ -103,7 +103,7 @@ function ProtectedContent() {
 
   return (
     <div
-      className="flex flex-1 flex-col min-w-0 h-svh overflow-hidden"
+      className="flex flex-1 flex-col min-w-0 h-svh overflow-hidden overscroll-none md:overscroll-auto"
       style={{ "--ac-sidebar-offset": sidebarOffset } as React.CSSProperties}
     >
       {!hideTopBar && <TopBar />}
@@ -150,7 +150,10 @@ export function App() {
           <Route path="/edit-3d" element={<PageScene />} />
           <Route path="/edit-3d/:sceneToken" element={<PageScene />} />
           <Route path="/video-editor" element={<VideoEditorPage />} />
-          <Route path="/video-editor/:projectId" element={<VideoEditorPage />} />
+          <Route
+            path="/video-editor/:projectId"
+            element={<VideoEditorPage />}
+          />
           <Route path="/support" element={<Support />} />
           <Route path="/pricing" element={<Pricing />} />
           {/* Welcome is public so it stays reachable right after signup
