@@ -51,6 +51,7 @@ declare global {
       refImageUrls?: string[];
       modelType?: string;
       timestamp: number;
+      batchCount?: number;
     }) => void;
   }
 }
@@ -108,6 +109,9 @@ interface PromptBoxVideoProps {
   uploadVideo?: UploadImageFn;
   uploadAudio?: UploadImageFn;
   credits?: number | null;
+  /** Optional model-picker slot rendered at the start of the toolbar
+   *  (left of the aspect-ratio picker). */
+  modelSelector?: React.ReactNode;
 }
 
 export const PromptBoxVideo = ({
@@ -122,6 +126,7 @@ export const PromptBoxVideo = ({
   uploadVideo,
   uploadAudio,
   credits,
+  modelSelector,
 }: PromptBoxVideoProps) => {
   useSignals();
 
@@ -193,6 +198,19 @@ export const PromptBoxVideo = ({
   // Model / Costs / Help row at the bottom of the page.
   const BOTTOM_SAFE_AREA_PX = 160;
 
+  // Viewport-relative expansion ceiling — mirrors PromptBoxImage's
+  // `clamp(120px, calc(100vh - 700px), 500px)` so the editor can stretch the
+  // same amount no matter where the (now bottom-fixed) prompt box sits on
+  // screen. Using the element's live top position made the box shrink as it
+  // moved down the page; this keeps a generous, position-independent ceiling.
+  const EXPANDED_HEIGHT = "clamp(120px, calc(100vh - 700px), 500px)";
+
+  const computeExpandedEditorHeight = (): number => {
+    return Math.max(120, Math.min(window.innerHeight - 700, 500));
+  };
+
+  // Collapsed cap stays element-relative so a long unexpanded prompt never
+  // pushes the box under the fixed bottom action row.
   const computeAvailableEditorHeight = (el: HTMLElement): number => {
     const topFromViewport = el.getBoundingClientRect().top;
     return Math.max(
@@ -207,9 +225,7 @@ export const PromptBoxVideo = ({
       const el = (mentionEditorRef.current ??
         textareaRef.current) as HTMLElement | null;
       if (el) {
-        el.style.height = next
-          ? `${computeAvailableEditorHeight(el)}px`
-          : "auto";
+        el.style.height = next ? EXPANDED_HEIGHT : "auto";
       }
       return next;
     });
@@ -271,8 +287,9 @@ export const PromptBoxVideo = ({
     const el = (mentionEditorRef.current ??
       textareaRef.current) as HTMLElement | null;
     if (!el) return;
-    const available = computeAvailableEditorHeight(el);
-    const maxH = isExpanded ? available : Math.min(available, 500);
+    const maxH = isExpanded
+      ? computeExpandedEditorHeight()
+      : Math.min(computeAvailableEditorHeight(el), 500);
     el.style.maxHeight = `${maxH}px`;
     el.style.minHeight = "0";
     if (!isExpanded) {
@@ -307,8 +324,9 @@ export const PromptBoxVideo = ({
     const el = (mentionEditorRef.current ??
       textareaRef.current) as HTMLElement | null;
     if (el) {
-      const available = computeAvailableEditorHeight(el);
-      const maxH = isExpanded ? available : Math.min(available, 500);
+      const maxH = isExpanded
+        ? computeExpandedEditorHeight()
+        : Math.min(computeAvailableEditorHeight(el), 500);
       el.style.maxHeight = `${maxH}px`;
       el.style.minHeight = "0";
       if (!isExpanded) {
@@ -997,7 +1015,7 @@ export const PromptBoxVideo = ({
         )}
         <div
           className={twMerge(
-            "glass relative w-[860px] rounded-xl p-4",
+            "glass relative w-full rounded-2xl p-4",
             isImageRowVisible && "rounded-t-none",
             isFocused
               ? "ring-1 ring-primary border-primary"
@@ -1071,6 +1089,7 @@ export const PromptBoxVideo = ({
           </div>
           <div className="mt-2 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
+              {modelSelector}
               <Tooltip
                 content="Aspect Ratio"
                 position="top"

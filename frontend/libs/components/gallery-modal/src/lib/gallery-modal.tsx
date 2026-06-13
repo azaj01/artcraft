@@ -52,7 +52,7 @@ import {
   galleryModalLightboxNavPrev,
   galleryModalLightboxNavNext,
 } from "./galleryModalSignals";
-import { FOLDER_DROP_EVENT } from "./galleryDnd";
+import galleryDnd, { FOLDER_DROP_EVENT } from "./galleryDnd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBorderAll,
@@ -496,6 +496,11 @@ export const GalleryModal = React.memo(
     const lightboxVisibleSignal = galleryModalLightboxVisible;
     const failedImageUrls = useRef<Set<string>>(new Set());
     const scrollContainerRef = useRef<HTMLDivElement>(null);
+    // Marquee (drag-rectangle) selection — view mode only. The rectangle is
+    // positioned imperatively (no React state per frame) and tile rects are
+    // cached at drag start; see handleMarqueePointerDown below.
+    const marqueeRef = useRef<HTMLDivElement>(null);
+    const marqueeRaf = useRef(0);
     const [username, setUsername] = useState<string>("");
     const [usernameError, setUsernameError] = useState(false);
     const [usernameRetryCount, setUsernameRetryCount] = useState(0);
@@ -607,6 +612,27 @@ export const GalleryModal = React.memo(
           .sort(compareFolders),
       [folders, activeFolderId],
     );
+
+    // Root-level folders for the filter sidebar — always roots, regardless of
+    // which folder is open in the browser tab (mirrors the webapp sidebar).
+    const rootFolders = useMemo(
+      () => folders.filter((f) => !f.parentId).sort(compareFolders),
+      [folders],
+    );
+
+    // Root ancestor of the open folder — drives the sidebar highlight (the
+    // sidebar lists only root folders), guarded against parent-chain cycles.
+    const activeRootFolderId = useMemo(() => {
+      if (galleryTab !== "folders" || !activeFolderId) return null;
+      const byId = new Map(folders.map((f) => [f.id, f]));
+      const seen = new Set<string>();
+      let cursor = byId.get(activeFolderId);
+      while (cursor && cursor.parentId && !seen.has(cursor.id)) {
+        seen.add(cursor.id);
+        cursor = byId.get(cursor.parentId);
+      }
+      return cursor?.id ?? null;
+    }, [galleryTab, folders, activeFolderId]);
 
     // Breadcrumb trail from root → active folder (inclusive), guarded against
     // cycles so a corrupted parent chain can never loop forever.
@@ -1027,6 +1053,214 @@ export const GalleryModal = React.memo(
       });
     }, []);
 
+    // ── Marquee (drag) selection ──────────────────────────────────────────
+    // Dragging from blank background draws a selection rectangle; tiles it
+    // covers are added to the bulk selection (additive to whatever was
+    // selected on start). Ported from the webapp library page, scoped to the
+    // modal's scroll container. Perf-sensitive: the rectangle is positioned
+    // imperatively, tile rects are cached at drag start, and selection commits
+    // only when the covered set actually changes.
+    const handleMarqueePointerDown = useCallback(
+      (e: React.PointerEvent<HTMLDivElement>) => {
+        if (e.button !== 0 || lightboxVisibleSignal.value) return;
+        // A per-tile drag (to a folder / the canvas) is already underway —
+        // never start a marquee on top of it.
+        if (galleryDnd.getDragState().isDragging) return;
+
+        const target = e.target as HTMLElement;
+        // Start only on blank background — never from tiles, folder cards,
+        // controls, or opted-out chrome.
+        if (
+          target.closest(
+            "[data-media-id], [data-folder-id], button, a, input, [data-no-marquee]",
+          )
+        ) {
+          return;
+        }
+        const scroller = scrollContainerRef.current;
+        if (!scroller) return;
+
+        // Blank-background press: suppress the browser's native text-selection
+        // default so it can't hijack the marquee drag.
+        e.preventDefault();
+
+        const startX = e.clientX;
+        const startY = e.clientY;
+        // No marquee on touch — a finger drag should scroll. A still tap on
+        // blank space still clears the selection below.
+        const isTouch = e.pointerType !== "mouse";
+        const base = new Set(bulkSelectedIds);
+        let applied = base;
+        let active = false;
+
+        const readScrollTop = () => scroller.scrollTop;
+        const readScrollLeft = () => scroller.scrollLeft;
+        const startScrollTop = readScrollTop();
+        const startScrollLeft = readScrollLeft();
+        let lastCx = startX;
+        let lastCy = startY;
+        let edgeRaf = 0;
+
+        let tiles: {
+          id: string;
+          left: number;
+          top: number;
+          right: number;
+          bottom: number;
+        }[] = [];
+        const cacheTiles = () => {
+          tiles = [];
+          scroller
+            .querySelectorAll<HTMLElement>("[data-media-id]")
+            .forEach((el) => {
+              const id = el.dataset.mediaId;
+              if (!id) return;
+              const r = el.getBoundingClientRect();
+              tiles.push({
+                id,
+                left: r.left,
+                top: r.top,
+                right: r.right,
+                bottom: r.bottom,
+              });
+            });
+        };
+        if (!isTouch) cacheTiles();
+
+        const applyMarquee = (cx: number, cy: number) => {
+          // Compensate the anchor for scrolling since drag start so the
+          // rectangle keeps growing in content space, not viewport space.
+          const ax = startX - (readScrollLeft() - startScrollLeft);
+          const ay = startY - (readScrollTop() - startScrollTop);
+          const left = Math.min(ax, cx);
+          const top = Math.min(ay, cy);
+          const width = Math.abs(cx - ax);
+          const height = Math.abs(cy - ay);
+          const right = left + width;
+          const bottom = top + height;
+          const box = marqueeRef.current;
+          if (box) {
+            // Clamp the *visible* rectangle to the scroll viewport so it never
+            // paints over the modal header / sidebar. Selection math below
+            // uses the unclamped rect, so tiles scrolled out of view stay
+            // selected.
+            const vr = scroller.getBoundingClientRect();
+            const dispLeft = Math.max(left, vr.left);
+            const dispRight = Math.min(right, vr.right);
+            const dispTop = Math.max(top, vr.top);
+            const dispBottom = Math.min(bottom, vr.bottom);
+            box.style.display = "block";
+            box.style.left = `${dispLeft}px`;
+            box.style.top = `${dispTop}px`;
+            box.style.width = `${Math.max(0, dispRight - dispLeft)}px`;
+            box.style.height = `${Math.max(0, dispBottom - dispTop)}px`;
+          }
+          const mounted = new Set(tiles.map((t) => t.id));
+          const next = new Set(base);
+          // Tiles swept over earlier may have unmounted (virtualized list)
+          // once scrolled far away — keep them selected.
+          for (const id of applied) {
+            if (!base.has(id) && !mounted.has(id)) next.add(id);
+          }
+          for (const t of tiles) {
+            if (
+              t.left < right &&
+              t.right > left &&
+              t.top < bottom &&
+              t.bottom > top
+            ) {
+              next.add(t.id);
+            }
+          }
+          // Commit only when coverage changed — most frames it hasn't.
+          let changed = next.size !== applied.size;
+          if (!changed) {
+            for (const id of next) {
+              if (!applied.has(id)) {
+                changed = true;
+                break;
+              }
+            }
+          }
+          if (changed) {
+            applied = next;
+            setBulkSelectedIds(next);
+          }
+        };
+
+        // Auto-scroll while the cursor sits within EDGE px of the scroller's
+        // top or bottom; speed ramps up nearer the edge. Self-perpetuating
+        // via rAF until the cursor leaves the zone or the drag ends.
+        const EDGE = 64;
+        const MAX_SPEED = 24;
+        const autoScrollTick = () => {
+          edgeRaf = 0;
+          if (!active || isTouch) return;
+          const r = scroller.getBoundingClientRect();
+          let dy = 0;
+          if (lastCy < r.top + EDGE) {
+            dy = -Math.min(MAX_SPEED, Math.ceil((r.top + EDGE - lastCy) / 3));
+          } else if (lastCy > r.bottom - EDGE) {
+            dy = Math.min(MAX_SPEED, Math.ceil((lastCy - (r.bottom - EDGE)) / 3));
+          }
+          if (dy === 0) return;
+          scroller.scrollTop += dy;
+          cacheTiles();
+          applyMarquee(lastCx, lastCy);
+          edgeRaf = requestAnimationFrame(autoScrollTick);
+        };
+        const ensureAutoScroll = () => {
+          if (!edgeRaf) edgeRaf = requestAnimationFrame(autoScrollTick);
+        };
+
+        const handleMove = (ev: PointerEvent) => {
+          if (isTouch) return;
+          if (!active) {
+            // Small threshold so plain background clicks don't flash a marquee.
+            if (
+              Math.abs(ev.clientX - startX) < 5 &&
+              Math.abs(ev.clientY - startY) < 5
+            ) {
+              return;
+            }
+            active = true;
+            document.body.style.userSelect = "none";
+          }
+          lastCx = ev.clientX;
+          lastCy = ev.clientY;
+          ensureAutoScroll();
+          cancelAnimationFrame(marqueeRaf.current);
+          marqueeRaf.current = requestAnimationFrame(() =>
+            applyMarquee(ev.clientX, ev.clientY),
+          );
+        };
+        const handleScroll = () => {
+          if (active && !isTouch) {
+            cacheTiles();
+            applyMarquee(lastCx, lastCy);
+          }
+        };
+        const handleUp = () => {
+          window.removeEventListener("pointermove", handleMove);
+          window.removeEventListener("pointerup", handleUp);
+          window.removeEventListener("scroll", handleScroll, true);
+          cancelAnimationFrame(marqueeRaf.current);
+          cancelAnimationFrame(edgeRaf);
+          document.body.style.userSelect = "";
+          if (marqueeRef.current) marqueeRef.current.style.display = "none";
+          // Plain click on blank background (no marquee drawn) clears the
+          // selection, like clicking the desktop on an OS.
+          if (!active) {
+            setBulkSelectedIds(new Set());
+          }
+        };
+        window.addEventListener("pointermove", handleMove);
+        window.addEventListener("pointerup", handleUp);
+        window.addEventListener("scroll", handleScroll, true);
+      },
+      [bulkSelectedIds, lightboxVisibleSignal],
+    );
+
     const handleItemClick = useCallback(
       (item: GalleryItem) => {
         if (mode === "select" && onSelectItem) {
@@ -1279,6 +1513,16 @@ export const GalleryModal = React.memo(
       setFolderMenuOpen(false);
       setContextMenu(null);
     }, []);
+
+    // Open a folder from the filter sidebar: jump to the folder browser tab
+    // with that folder active.
+    const handleOpenFolderFromSidebar = useCallback(
+      (folderId: string) => {
+        setGalleryTab("folders");
+        handleOpenFolder(folderId);
+      },
+      [handleOpenFolder],
+    );
 
     // Close any open folder menus
     const closeFolderMenus = useCallback(() => {
@@ -2167,49 +2411,118 @@ export const GalleryModal = React.memo(
             </div>
 
             <div className="flex flex-1 overflow-hidden" data-gallery-modal>
-              {/* ── Filter sidebar ── (Unsorted tab / picker only; the Folders
-                  tab is a full-width browser) */}
-              {!hideFilter && galleryTab === "unsorted" && (
-                <div className="w-52 min-w-[13rem] border-r border-ui-panel-border bg-ui-background flex flex-col overflow-y-auto">
-                  {/* Filter items — hidden when the gallery is used as a constrained picker */}
-                  {!hideFilter && (
-                    <>
-                      <div className="flex flex-col px-1.5 pt-2 pb-1">
-                        {SIDEBAR_FILTERS.map((f) => {
-                          const isActive = activeFilter === f.id;
-                          return (
-                            <button
-                              key={f.id}
-                              type="button"
-                              onClick={() => {
-                                if (!forceFilter) {
-                                  setActiveFilter(f.id);
-                                  setActiveFolderId(null);
-                                }
-                              }}
-                              className={twMerge(
-                                "flex items-center justify-between gap-2 rounded-md px-2.5 py-1.5 text-sm transition-colors",
-                                isActive && !activeFolderId
-                                  ? "bg-ui-controls/60 text-base-fg font-medium"
-                                  : "text-base-fg/70 hover:bg-ui-controls/30 hover:text-base-fg",
-                                forceFilter &&
-                                  f.id !== activeFilter &&
-                                  "opacity-50 pointer-events-none",
-                              )}
-                            >
-                              <div className="flex items-center gap-2.5">
-                                <FontAwesomeIcon
-                                  icon={f.icon}
-                                  className="text-xs w-4"
-                                />
-                                <span>{f.label}</span>
-                              </div>
-                            </button>
-                          );
-                        })}
+              {/* ── Filter sidebar ── shown on both tabs; clicking a filter
+                  jumps back to the library, clicking a folder into the browser */}
+              {!hideFilter && (
+                <div className="w-52 min-w-[13rem] border-r border-ui-panel-border bg-ui-panel flex flex-col overflow-hidden">
+                  {/* Filter items — pinned; they never scroll out of view */}
+                  <div className="flex flex-col px-1.5 pt-2 pb-1 flex-shrink-0">
+                    {SIDEBAR_FILTERS.map((f) => {
+                      const isActive =
+                        galleryTab === "unsorted" && activeFilter === f.id;
+                      return (
+                        <button
+                          key={f.id}
+                          type="button"
+                          onClick={() => {
+                            if (!forceFilter) {
+                              setActiveFilter(f.id);
+                              switchGalleryTab("unsorted");
+                            }
+                          }}
+                          className={twMerge(
+                            "flex items-center justify-between gap-2 rounded-md px-2.5 py-1.5 text-sm transition-colors",
+                            isActive && !activeFolderId
+                              ? "bg-ui-controls/60 text-base-fg font-medium"
+                              : "text-base-fg/70 hover:bg-ui-controls/30 hover:text-base-fg",
+                            forceFilter &&
+                              f.id !== activeFilter &&
+                              "opacity-50 pointer-events-none",
+                          )}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <FontAwesomeIcon
+                              icon={f.icon}
+                              className="text-xs w-4"
+                            />
+                            <span>{f.label}</span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {/* Folders header — pinned alongside the filters */}
+                  <div className="flex items-center justify-between px-3 pt-2 pb-1 flex-shrink-0">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-base-fg/40">
+                      Folders
+                    </span>
+                    {mode === "view" && (
+                      <button
+                        type="button"
+                        onClick={() => handleOpenNewFolderModal(null)}
+                        aria-label="New folder"
+                        className="flex h-5 w-5 items-center justify-center rounded text-base-fg/50 hover:bg-ui-controls/60 hover:text-base-fg transition-colors"
+                      >
+                        <FontAwesomeIcon icon={faPlus} className="text-[10px]" />
+                      </button>
+                    )}
+                  </div>
+                  {/* Folder list — the only scrolling region; fills the rest of the column */}
+                  <div className="flex flex-1 min-h-0 flex-col overflow-y-auto px-1.5 pb-2">
+                    {rootFolders.length === 0 ? (
+                      <div className="px-2.5 py-1.5 text-xs text-base-fg/30 italic">
+                        No folders yet
                       </div>
-                    </>
-                  )}
+                    ) : (
+                      rootFolders.map((folder) => (
+                        <button
+                          key={folder.id}
+                          type="button"
+                          data-folder-id={folder.id}
+                          onClick={() => handleOpenFolderFromSidebar(folder.id)}
+                          onContextMenu={
+                            // Folder management is view-mode only; the select picker just browses.
+                            mode === "view"
+                              ? (e) => {
+                                  e.preventDefault();
+                                  setContextMenu({
+                                    folderId: folder.id,
+                                    x: e.clientX,
+                                    y: e.clientY,
+                                  });
+                                }
+                              : undefined
+                          }
+                          className={twMerge(
+                            "flex w-full flex-shrink-0 items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm transition-colors [&.folder-drag-over]:bg-primary/20 [&.folder-drag-over]:text-base-fg",
+                            activeRootFolderId === folder.id
+                              ? "bg-ui-controls/60 text-base-fg font-medium"
+                              : "text-base-fg/70 hover:bg-ui-controls/30 hover:text-base-fg",
+                          )}
+                        >
+                          <FontAwesomeIcon
+                            icon={faFolder}
+                            className={twMerge(
+                              "text-xs w-4",
+                              !folder.colorCode && "text-primary",
+                            )}
+                            style={
+                              folder.colorCode
+                                ? { color: folder.colorCode }
+                                : undefined
+                            }
+                          />
+                          <span className="truncate">{folder.name}</span>
+                          {folder.hasStar && (
+                            <FontAwesomeIcon
+                              icon={faStar}
+                              className="ml-auto text-[10px] text-amber-400"
+                            />
+                          )}
+                        </button>
+                      ))
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -2218,6 +2531,9 @@ export const GalleryModal = React.memo(
                 ref={scrollContainerRef}
                 className="flex-1 overflow-y-auto bg-ui-panel"
                 onScroll={handleScroll}
+                onPointerDown={
+                  mode === "view" ? handleMarqueePointerDown : undefined
+                }
               >
                 {/* Subfolder tiles for the current location (root or open folder) */}
                 {folderChipsSection}
@@ -2765,6 +3081,22 @@ export const GalleryModal = React.memo(
                 onSetColor={handleSetFolderColor}
               />
             </>,
+            document.body,
+          )}
+
+        {/* Marquee selection rectangle — fixed-positioned, painted imperatively
+            by handleMarqueePointerDown. View mode only. Portaled to <body> so
+            its `position: fixed` resolves against the viewport (the draggable
+            modal applies a transform, which would otherwise make a fixed child
+            position relative to the modal — and the rectangle, set with
+            viewport clientX/Y, would render off-screen). */}
+        {mode === "view" &&
+          createPortal(
+            <div
+              ref={marqueeRef}
+              className="pointer-events-none fixed z-[9999] rounded-sm border border-primary/60 bg-primary/10"
+              style={{ display: "none" }}
+            />,
             document.body,
           )}
       </>

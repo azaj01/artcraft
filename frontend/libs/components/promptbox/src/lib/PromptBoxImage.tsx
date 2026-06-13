@@ -6,10 +6,7 @@ import { PopoverMenu, PopoverItem } from "@storyteller/ui-popover";
 import { Tooltip } from "@storyteller/ui-tooltip";
 import { Button, ToggleButton, GenerateButton } from "@storyteller/ui-button";
 import { Modal } from "@storyteller/ui-modal";
-import {
-  GenerateImage,
-  GenerateImageRequest,
-} from "@storyteller/tauri-api";
+import { GenerateImage, GenerateImageRequest } from "@storyteller/tauri-api";
 import {
   faMessageXmark,
   faMessageCheck,
@@ -19,7 +16,11 @@ import {
 } from "@fortawesome/pro-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { CommonAspectRatio, ImageModel } from "@storyteller/model-list";
-import { usePromptImageStore, RefImage, useEnterToGenerateStore } from "./promptStore";
+import {
+  usePromptImageStore,
+  RefImage,
+  useEnterToGenerateStore,
+} from "./promptStore";
 import { gtagEvent } from "@storyteller/google-analytics";
 import { twMerge } from "tailwind-merge";
 import { ImagePromptRow } from "./ImagePromptRow";
@@ -53,6 +54,9 @@ interface PromptBoxImageProps {
   url?: string;
   onImageRowVisibilityChange?: (visible: boolean) => void;
   credits?: number | null;
+  /** Optional model-picker slot rendered at the start of the toolbar
+   *  (left of the aspect-ratio picker). */
+  modelSelector?: ReactNode;
 }
 
 export const PromptBoxImage = ({
@@ -65,10 +69,15 @@ export const PromptBoxImage = ({
   url,
   onImageRowVisibilityChange,
   credits,
+  modelSelector,
 }: PromptBoxImageProps) => {
   useSignals();
 
-  console.debug("Selected model and provider:", selectedModel, selectedProvider);
+  console.debug(
+    "Selected model and provider:",
+    selectedModel,
+    selectedProvider,
+  );
 
   useEffect(() => {
     if (imageMediaId && url) {
@@ -333,6 +342,7 @@ export const PromptBoxImage = ({
         refImageUrls: referenceImages?.map((img) => img.url).filter(Boolean),
         modelType: (selectedModel as any)?.tauriId || String(selectedModel),
         timestamp: Date.now(),
+        batchCount: generationCount,
       });
 
       console.debug("Image Generation Request", request);
@@ -414,7 +424,7 @@ export const PromptBoxImage = ({
 
         <div
           className={twMerge(
-            "glass relative w-[860px] rounded-xl p-4",
+            "glass relative w-full rounded-2xl p-4",
             isImageRowVisible &&
               selectedModel?.canUseImagePrompt &&
               "rounded-t-none",
@@ -479,6 +489,7 @@ export const PromptBoxImage = ({
           </div>
           <div className="mt-2 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
+              {modelSelector}
               {selectedModel?.supportsNewAspectRatio() && (
                 <AspectRatioPicker
                   model={selectedModel}

@@ -18,7 +18,11 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
-import { Prompt2DStore, RefImage, useEnterToGenerateStore } from "./promptStore";
+import {
+  Prompt2DStore,
+  RefImage,
+  useEnterToGenerateStore,
+} from "./promptStore";
 import { ImageModel } from "@storyteller/model-list";
 import { ImagePromptRow, UploadImageFn } from "./ImagePromptRow";
 import { twMerge } from "tailwind-merge";
@@ -50,6 +54,9 @@ export interface PromptBox2DProps {
   onAspectRatioChange?: (ratio: AspectRatio) => void;
   onFitPressed?: () => void | Promise<void>;
   usePrompt2DStore: UseBoundStore<StoreApi<Prompt2DStore>>;
+  /** Optional model-picker slot rendered at the start of the toolbar
+   *  (left of the aspect-ratio picker). */
+  modelSelector?: React.ReactNode;
 }
 
 export const PromptBox2D = ({
@@ -65,6 +72,7 @@ export const PromptBox2D = ({
   onAspectRatioChange,
   onFitPressed,
   usePrompt2DStore,
+  modelSelector,
 }: PromptBox2DProps) => {
   useSignals();
 
@@ -376,7 +384,7 @@ export const PromptBox2D = ({
         )}
         <div
           className={twMerge(
-            "glass relative w-[860px] rounded-xl p-4",
+            "glass relative w-[860px] rounded-2xl p-4",
             selectedImageModel?.canUseImagePrompt &&
               isImageRowVisible &&
               "rounded-t-none",
@@ -438,6 +446,7 @@ export const PromptBox2D = ({
           </div>
           <div className="mt-2 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
+              {modelSelector}
               {selectedImageModel?.canChangeAspectRatio && (
                 <Tooltip
                   content="Aspect ratio"
