@@ -65,7 +65,13 @@ fn do_build_cors_config(is_production: bool) -> Cors {
   }
 
   // Remaining setup
-  cors.allowed_methods(vec!["GET", "POST", "PUT", "OPTIONS", "DELETE"])
+  //
+  // NB: actix-cors 0.7 flipped the `block_on_origin_mismatch` default to
+  // false (mismatched origins get a 200 without CORS headers and the browser
+  // enforces the block). We keep the long-standing 0.6 behavior of rejecting
+  // mismatched origins server-side with a 400.
+  cors.block_on_origin_mismatch(true)
+      .allowed_methods(vec!["GET", "POST", "PUT", "OPTIONS", "DELETE"])
       .supports_credentials()
       .allowed_headers(vec![
         actix_http::header::ACCEPT,
@@ -82,12 +88,49 @@ fn do_build_cors_config(is_production: bool) -> Cors {
 mod tests {
   use server_environment::ServerEnvironment;
 
+  use crate::testing::assert_no_origin_header_ok;
   use crate::testing::assert_origin_invalid;
   use crate::testing::assert_origin_ok;
   use crate::testing::assert_preflight_method_invalid;
   use crate::testing::assert_preflight_method_ok;
 
   use super::build_cors_config;
+
+  /// Every production origin that hosts a product (or IS a backend that
+  /// serves same-origin pages like swagger) must be allowed. This is the
+  /// guard against `block_on_origin_mismatch(true)` locking out a real
+  /// frontend after a CORS-crate upgrade.
+  #[actix_rt::test]
+  async fn test_production_product_and_backend_origins_are_allowed() {
+    let production_cors = build_cors_config(ServerEnvironment::Production);
+
+    let origins = [
+      // Backends (same-origin browser requests still carry an Origin header).
+      "https://api.fakeyou.com",
+      "https://api.storyteller.ai",
+      // Products
+      "https://fakeyou.com",
+      "https://storyteller.ai",
+      "https://app.getartcraft.com",
+      "https://getartcraft.com",
+      "https://www.getartcraft.com",
+      "https://artcraft.ai",
+      "https://www.artcraft.ai",
+      "https://artcraft-dashboard.netlify.app",
+    ];
+    for origin in origins {
+      assert_origin_ok(&production_cors, origin).await;
+    }
+  }
+
+  /// Non-browser clients (curl, python API clients, server-to-server) send
+  /// no Origin header and must never be blocked, even with
+  /// `block_on_origin_mismatch(true)`.
+  #[actix_rt::test]
+  async fn test_requests_without_origin_header_are_not_blocked() {
+    let production_cors = build_cors_config(ServerEnvironment::Production);
+    assert_no_origin_header_ok(&production_cors).await;
+  }
 
   #[actix_rt::test]
   async fn test_preflight_allows_every_supported_method() {
